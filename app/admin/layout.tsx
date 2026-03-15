@@ -44,7 +44,7 @@ export default function AdminLayout({
                 <div className="animate-in fade-in zoom-in duration-500">
                     <div className="relative w-40 h-40 md:w-56 md:h-56">
                         <Image
-                            src="/loading_logo.png"
+                            src="/hadya.png"
                             alt="Loading Logo"
                             fill
                             className="object-contain"
