@@ -99,18 +99,11 @@ export default function AdminDashboardPage() {
                     colorClass="bg-blue-100 text-blue-600"
                 />
                 <StatCard
-                    title="Total Batches"
-                    value={metrics.totalBatches}
-                    subtext={`${metrics.activeBatches} active campaigns`}
-                    icon={Layers}
+                    title="Monthly Revenue"
+                    value={`₹${metrics.monthlyRevenue.toLocaleString()}`}
+                    subtext="Collected this month"
+                    icon={CreditCard}
                     colorClass="bg-amber-100 text-amber-600"
-                />
-                <StatCard
-                    title="Total Units"
-                    value={metrics.totalUnits}
-                    subtext="Across all districts"
-                    icon={MapPin}
-                    colorClass="bg-purple-100 text-purple-600"
                 />
             </div>
 
@@ -137,7 +130,7 @@ export default function AdminDashboardPage() {
                             <TableRow>
                                 <TableHead className="w-[200px] font-semibold text-gray-600">Donor</TableHead>
                                 <TableHead className="font-semibold text-gray-600">Amount</TableHead>
-                                <TableHead className="font-semibold text-gray-600">Batch</TableHead>
+                                <TableHead className="font-semibold text-gray-600">Place</TableHead>
                                 <TableHead className="font-semibold text-gray-600">Method</TableHead>
                                 <TableHead className="font-semibold text-gray-600">Status</TableHead>
                                 <TableHead className="text-right font-semibold text-gray-600">Date</TableHead>
@@ -159,7 +152,7 @@ export default function AdminDashboardPage() {
                                         </TableCell>
                                         <TableCell className="font-bold text-primary">₹{txn.amount.toLocaleString()}</TableCell>
                                         <TableCell>
-                                            {txn.batch ? <Badge variant="secondary" className="font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border-none">{txn.batch.name}</Badge> : "-"}
+                                            {txn.placeName ? <Badge variant="secondary" className="font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border-none">{txn.placeName}</Badge> : "-"}
                                         </TableCell>
                                         <TableCell className="text-gray-600 text-sm">{txn.paymentMethod}</TableCell>
                                         <TableCell>

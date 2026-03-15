@@ -13,7 +13,7 @@ interface Batch {
   name: string;
   amount: number;
   rank?: number;
-  batch?: string; // For individuals
+  place?: string; // For individuals
 }
 
 export default function Home() {
@@ -21,7 +21,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   // Leaderboard State
-  const [activeTab, setActiveTab] = useState("batches");
+  const [activeTab, setActiveTab] = useState("places");
   const [leaderboardData, setLeaderboardData] = useState<Batch[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
 
@@ -128,7 +128,7 @@ export default function Home() {
         <h3 className="text-center text-xl font-bold mb-5 text-[#162B40]">Leading Today</h3>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col items-center text-gray-800">
           <TabsList className="bg-transparent items-center justify-center gap-2 flex-nowrap h-auto mb-6 w-full max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-gray-800">
-            {["Batches", "Individuals", "Districts"].map((tab) => (
+            {["Places", "Individuals"].map((tab) => (
               <TabsTrigger
                 key={tab}
                 value={tab.toLowerCase()}
@@ -165,7 +165,7 @@ export default function Home() {
                       <div>
                         <p className="font-bold text-[15px] text-black">{item.name}</p>
                         <p className="text-xs text-black/60 font-medium">
-                          {item.batch}
+                          {item.place}
                         </p>
                       </div>
                     </div>

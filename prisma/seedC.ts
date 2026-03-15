@@ -11,7 +11,7 @@ async function main() {
         update: {},
         create: {
             email: "hadyaadmin@sabeelulhidaya.info",
-            name: "Super Admin",
+            name: "Super Admin", 
             password: adminPassword,
             role: "SUPERADMIN",
         },

@@ -67,10 +67,6 @@ export default function AdminLayout({
     const sidebarItems = [
         { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
         { name: "Donations", href: "/admin/donations", icon: CreditCard },
-        { name: "Places", href: "/admin/places", icon: MapPin },
-        { name: "Batches", href: "/admin/batches", icon: Layers },
-        { name: "Coordinators", href: "/admin/coordinators", icon: Users },
-        { name: "Units", href: "/admin/units", icon: Building2 },
         { name: "Reports", href: "/admin/reports", icon: BarChart },
         { name: "Slides", href: "/admin/slides", icon: Layers },
         { name: "Settings", href: "/admin/settings", icon: Settings },

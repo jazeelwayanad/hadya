@@ -16,67 +16,10 @@ model User {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   username           String?    @unique
-  batchId            String?
   collectedDonations Donation[] @relation("CollectedBy")
-  batch              Batch?     @relation(fields: [batchId], references: [id])
 }
 
-model Section {
-  id        String      @id @default(cuid())
-  name      String
-  type      SectionType
-  category  String      @default("KERALA")
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  districts District[]
-  donations Donation[]
-}
 
-model District {
-  id        String     @id @default(cuid())
-  name      String
-  sectionId String
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  section   Section    @relation(fields: [sectionId], references: [id])
-  donations Donation[]
-  places    Place[]
-}
-
-model Place {
-  id         String     @id @default(cuid())
-  name       String
-  type       PlaceType
-  districtId String
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  donations  Donation[]
-  district   District   @relation(fields: [districtId], references: [id])
-}
-
-model Unit {
-  id        String     @id @default(cuid())
-  name      String
-  placeIds  String[]
-  status    UnitStatus @default(Active)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  donations Donation[]
-}
-
-model Batch {
-  id           String      @id @default(cuid())
-  name         String      @unique
-  slug         String?     @unique
-  year         String
-  description  String?
-  status       BatchStatus @default(Active)
-  totalAmount  Float       @default(0)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  donations    Donation[]
-  coordinators User[]
-}
 
 model Donation {
   id            String           @id @default(cuid())
@@ -84,11 +27,7 @@ model Donation {
   name          String?
   mobile        String?
   hideName      Boolean          @default(false)
-  batchId       String?
-  unitId        String?
-  placeId       String?
-  districtId    String?
-  sectionId     String?
+  placeName     String?
   paymentMethod PaymentMethod
   paymentStatus PaymentStatus    @default(PENDING)
   transactionId String?          @unique
@@ -96,12 +35,7 @@ model Donation {
   collectedById String?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
-  batch         Batch?           @relation(fields: [batchId], references: [id])
   collectedBy   User?            @relation("CollectedBy", fields: [collectedById], references: [id])
-  district      District?        @relation(fields: [districtId], references: [id])
-  place         Place?           @relation(fields: [placeId], references: [id])
-  section       Section?         @relation(fields: [sectionId], references: [id])
-  unit          Unit?            @relation(fields: [unitId], references: [id])
 }
 
 model Settings {
@@ -138,30 +72,7 @@ enum Role {
   COORDINATOR
 }
 
-enum SectionType {
-  State
-  Section
-  Country
-  Other
-}
 
-enum PlaceType {
-  Municipality
-  Panchayat
-  Corporation
-  Other
-}
-
-enum UnitStatus {
-  Active
-  Inactive
-}
-
-enum BatchStatus {
-  Active
-  Completed
-  Archived
-}
 
 enum PaymentMethod {
   UPI
@@ -177,7 +88,6 @@ enum PaymentStatus {
 }
 
 enum DonationCategory {
-  BATCH
   GENERAL
   PARENT
 }

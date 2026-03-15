@@ -8,15 +8,10 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
-        const batchId = searchParams.get('batchId');
-        const unitId = searchParams.get('unitId');
         const status = searchParams.get('status');
         const search = searchParams.get('search');
 
         const where: any = {};
-
-        if (batchId) where.batchId = batchId;
-        if (unitId) where.unitId = unitId;
 
         // If specific status requested (e.g. from filter dropdown), use it
         if (status && status !== 'ALL') {
@@ -34,20 +29,12 @@ export async function GET(request: Request) {
         const donations = await prisma.donation.findMany({
             where,
             include: {
-                batch: {
-                    select: {
-                        id: true,
-                        name: true,
-                    }
-                },
                 collectedBy: {
                     select: {
                         name: true,
                         username: true
                     }
-                },
-                unit: { select: { id: true, name: true } },
-                place: { select: { id: true, name: true } },
+                }
             },
             orderBy: { createdAt: 'desc' },
         });
@@ -66,9 +53,7 @@ export async function POST(request: Request) {
             amount,
             name,
             mobile,
-            batchId,
-            unitId,
-            placeId,
+            placeName,
             paymentMethod,
             transactionId,
             hideName
@@ -92,25 +77,13 @@ export async function POST(request: Request) {
                 amount: parseFloat(amount),
                 name,
                 mobile,
-                batchId,
-                unitId,
-                placeId,
+                placeName,
                 paymentMethod: paymentMethod as PaymentMethod,
                 transactionId: finalTransactionId,
                 hideName: hideName || false,
                 paymentStatus: 'SUCCESS',
             },
         });
-
-        // Update Batch totalAmount
-        if (batchId) {
-            await prisma.batch.update({
-                where: { id: batchId },
-                data: {
-                    totalAmount: { increment: parseFloat(amount) }
-                }
-            });
-        }
 
         return NextResponse.json(donation);
     } catch (error) {

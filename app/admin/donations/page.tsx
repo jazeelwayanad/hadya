@@ -51,36 +51,13 @@ interface Donation {
     paymentMethod: string
     paymentStatus: "PENDING" | "SUCCESS" | "FAILED"
     createdAt: string
-    batch?: {
-        id: string;
-        name: string;
-        coordinators?: { name: string; username: string | null }[]
-    }
-    unit?: { id: string; name: string }
-    place?: { id: string; name: string }
+    placeName?: string | null
     collectedBy?: {
         name: string
         username: string | null
     } | null
-    category: "BATCH" | "GENERAL" | "PARENT"
+    category: "GENERAL" | "PARENT"
     hideName: boolean
-}
-
-interface Batch {
-    id: string
-    name: string
-}
-
-interface Unit {
-    id: string
-    name: string
-    placeIds: string[]
-}
-
-interface Place {
-    id: string
-    name: string
-    districtName: string
 }
 
 export default function AdminDonationsPage() {
@@ -91,15 +68,9 @@ export default function AdminDonationsPage() {
     // Filters
     const [statusFilter, setStatusFilter] = useState<string>("ALL")
     const [methodFilter, setMethodFilter] = useState<string>("ALL")
-    const [batchFilter, setBatchFilter] = useState<string>("ALL")
-    const [unitFilter, setUnitFilter] = useState<string>("ALL")
-    const [placeFilter, setPlaceFilter] = useState<string>("ALL")
     const [categoryFilter, setCategoryFilter] = useState<string>("ALL")
 
     // Manual Entry Data
-    const [batches, setBatches] = useState<Batch[]>([])
-    const [units, setUnits] = useState<Unit[]>([])
-    const [places, setPlaces] = useState<Place[]>([])
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
     const [newDonation, setNewDonation] = useState({
         amount: "",
@@ -107,9 +78,7 @@ export default function AdminDonationsPage() {
         mobile: "",
         paymentMethod: "CASH",
         transactionId: "",
-        batchId: "none",
-        unitId: "none",
-        placeId: "none",
+        placeName: "",
         hideName: false,
     })
     const [submitting, setSubmitting] = useState(false)
@@ -123,11 +92,9 @@ export default function AdminDonationsPage() {
         mobile: "",
         paymentMethod: "CASH",
         transactionId: "",
-        batchId: "none",
-        unitId: "none",
-        placeId: "none",
+        placeName: "",
         hideName: false,
-        category: "GENERAL" as "BATCH" | "GENERAL" | "PARENT"
+        category: "GENERAL" as "GENERAL" | "PARENT"
     })
 
     // Receipt View
@@ -165,33 +132,6 @@ export default function AdminDonationsPage() {
 
     const fetchMetadata = async () => {
         try {
-            // Fetch Batches
-            const batchRes = await fetch("/api/admin/batches")
-            if (batchRes.ok) setBatches(await batchRes.json())
-
-            // Fetch Units
-            const unitRes = await fetch("/api/admin/units")
-            if (unitRes.ok) setUnits(await unitRes.json())
-
-            // Fetch Places and flatten
-            const placeRes = await fetch("/api/admin/places")
-            if (placeRes.ok) {
-                const sections = await placeRes.json()
-                const flatPlaces: Place[] = []
-                sections.forEach((section: any) => {
-                    section.districts.forEach((district: any) => {
-                        district.places.forEach((place: any) => {
-                            flatPlaces.push({
-                                id: place.id,
-                                name: place.name,
-                                districtName: district.name
-                            })
-                        })
-                    })
-                })
-                setPlaces(flatPlaces)
-            }
-
             // Fetch Settings for Receipt
             const settingsRes = await fetch("/api/admin/settings")
             if (settingsRes.ok) setSettings(await settingsRes.json())
@@ -206,23 +146,13 @@ export default function AdminDonationsPage() {
             (d.transactionId?.toLowerCase() || "").includes(searchQuery.toLowerCase()) ||
             (d.mobile || "").includes(searchQuery) ||
             (d.id.toLowerCase().includes(searchQuery.toLowerCase())) ||
-            (d.batch?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (d.unit?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (d.place?.name || "").toLowerCase().includes(searchQuery.toLowerCase())
+            (d.placeName || "").toLowerCase().includes(searchQuery.toLowerCase())
 
         const matchesStatus = statusFilter === "ALL" || d.paymentStatus === statusFilter
         const matchesMethod = methodFilter === "ALL" || d.paymentMethod === methodFilter
-        const matchesBatch = batchFilter === "ALL" || (d.batch?.id === batchFilter)
-
-        // Match explicit Unit ID OR if the donation's Place is part of the selected Unit
-        const matchesUnit = unitFilter === "ALL" ||
-            (d.unit?.id === unitFilter) ||
-            (d.place?.id ? units.find(u => u.id === unitFilter)?.placeIds.includes(d.place.id) : false)
-
-        const matchesPlace = placeFilter === "ALL" || (d.place?.id === placeFilter)
         const matchesCategory = categoryFilter === "ALL" || (d.category === categoryFilter)
 
-        return matchesSearch && matchesStatus && matchesMethod && matchesBatch && matchesUnit && matchesPlace && matchesCategory
+        return matchesSearch && matchesStatus && matchesMethod && matchesCategory
     })
 
 
@@ -246,6 +176,7 @@ export default function AdminDonationsPage() {
         }
     }
 
+
     const handleCreateDonation = async () => {
         if (!newDonation.amount || !newDonation.paymentMethod) {
             toast.error("Amount and Payment Method are required")
@@ -255,10 +186,7 @@ export default function AdminDonationsPage() {
         setSubmitting(true)
         try {
             const payload = {
-                ...newDonation,
-                batchId: newDonation.batchId === "none" ? undefined : newDonation.batchId,
-                unitId: newDonation.unitId === "none" ? undefined : newDonation.unitId,
-                placeId: newDonation.placeId === "none" ? undefined : newDonation.placeId,
+                ...newDonation
             }
 
             const res = await fetch("/api/admin/donations", {
@@ -276,9 +204,7 @@ export default function AdminDonationsPage() {
                     mobile: "",
                     paymentMethod: "CASH",
                     transactionId: "",
-                    batchId: "none",
-                    unitId: "none",
-                    placeId: "none",
+                    placeName: "",
                     hideName: false,
                 })
                 fetchDonations()
@@ -294,6 +220,7 @@ export default function AdminDonationsPage() {
         }
     }
 
+
     const handleEditClick = (donation: Donation) => {
         setEditingDonation({
             id: donation.id,
@@ -302,9 +229,7 @@ export default function AdminDonationsPage() {
             mobile: donation.mobile || "",
             paymentMethod: donation.paymentMethod,
             transactionId: donation.transactionId || "",
-            batchId: donation.batch?.id || "none",
-            unitId: donation.unit?.id || "none",
-            placeId: donation.place?.id || "none",
+            placeName: donation.placeName || "",
             hideName: donation.hideName || false,
             category: donation.category || "GENERAL"
         })
@@ -321,9 +246,6 @@ export default function AdminDonationsPage() {
         try {
             const payload = {
                 ...editingDonation,
-                batchId: editingDonation.batchId === "none" ? null : editingDonation.batchId,
-                unitId: editingDonation.unitId === "none" ? null : editingDonation.unitId,
-                placeId: editingDonation.placeId === "none" ? null : editingDonation.placeId,
                 hideName: editingDonation.hideName,
                 category: editingDonation.category
             }
@@ -351,7 +273,7 @@ export default function AdminDonationsPage() {
     }
 
     const handleExportCSV = () => {
-        const headers = ["ID", "Date", "Category", "Name", "Mobile", "Amount", "Method", "Transaction ID", "Status", "Batch", "Coordinator", "Unit", "Place"]
+        const headers = ["ID", "Date", "Category", "Name", "Mobile", "Amount", "Method", "Transaction ID", "Status", "Place", "Coordinator"]
         const csvContent = [
             headers.join(","),
             ...filteredDonations.map(d => [
@@ -364,10 +286,8 @@ export default function AdminDonationsPage() {
                 d.paymentMethod,
                 d.transactionId || "",
                 d.paymentStatus,
-                d.batch?.name || "",
+                `"${d.placeName || ""}"`,
                 `"${d.collectedBy?.name || ""}"`,
-                d.unit?.name || "",
-                d.place?.name || ""
             ].join(","))
         ].join("\n")
 
@@ -383,6 +303,7 @@ export default function AdminDonationsPage() {
             document.body.removeChild(link)
         }
     }
+
 
     if (loading) return <div className="flex h-96 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>
 
@@ -475,64 +396,13 @@ export default function AdminDonationsPage() {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <Label htmlFor="batch">Batch</Label>
-                                    <Select
-                                        value={newDonation.batchId}
-                                        onValueChange={(val) => setNewDonation({ ...newDonation, batchId: val })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select Batch" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="none">None</SelectItem>
-                                            {batches.map((batch) => (
-                                                <SelectItem key={batch.id} value={batch.id}>
-                                                    {batch.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="unit">Unit</Label>
-                                        <Select
-                                            value={newDonation.unitId}
-                                            onValueChange={(val) => setNewDonation({ ...newDonation, unitId: val })}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select Unit" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="none">None</SelectItem>
-                                                {units.map((unit) => (
-                                                    <SelectItem key={unit.id} value={unit.id}>
-                                                        {unit.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="place">Place</Label>
-                                        <Select
-                                            value={newDonation.placeId}
-                                            onValueChange={(val) => setNewDonation({ ...newDonation, placeId: val })}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select Place" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="none">None</SelectItem>
-                                                {places.map((place) => (
-                                                    <SelectItem key={place.id} value={place.id}>
-                                                        {place.name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                                    <Label htmlFor="place">Place Name</Label>
+                                    <Input
+                                        id="place"
+                                        placeholder="Optional Place Name"
+                                        value={newDonation.placeName}
+                                        onChange={(e) => setNewDonation({ ...newDonation, placeName: e.target.value })}
+                                    />
                                 </div>
                             </div>
                             <DialogFooter>
@@ -600,7 +470,6 @@ export default function AdminDonationsPage() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="GENERAL">General</SelectItem>
-                                        <SelectItem value="BATCH">Batch</SelectItem>
                                         <SelectItem value="PARENT">Parents</SelectItem>
                                     </SelectContent>
                                 </Select>
@@ -641,67 +510,14 @@ export default function AdminDonationsPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="edit-batch">Batch</Label>
-                                <Select
-                                    value={editingDonation.batchId}
-                                    onValueChange={(val) => setEditingDonation({ ...editingDonation, batchId: val })}
-                                    disabled={!isEditable("batchId")}
-                                >
-                                    <SelectTrigger id="edit-batch">
-                                        <SelectValue placeholder="Select Batch" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="none">None</SelectItem>
-                                        {batches.map((batch) => (
-                                            <SelectItem key={batch.id} value={batch.id}>
-                                                {batch.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="edit-unit">Unit</Label>
-                                    <Select
-                                        value={editingDonation.unitId}
-                                        onValueChange={(val) => setEditingDonation({ ...editingDonation, unitId: val })}
-                                        disabled={!isEditable("unitId")}
-                                    >
-                                        <SelectTrigger id="edit-unit">
-                                            <SelectValue placeholder="Select Unit" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="none">None</SelectItem>
-                                            {units.map((unit) => (
-                                                <SelectItem key={unit.id} value={unit.id}>
-                                                    {unit.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="edit-place">Place</Label>
-                                    <Select
-                                        value={editingDonation.placeId}
-                                        onValueChange={(val) => setEditingDonation({ ...editingDonation, placeId: val })}
-                                        disabled={!isEditable("placeId")}
-                                    >
-                                        <SelectTrigger id="edit-place">
-                                            <SelectValue placeholder="Select Place" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="none">None</SelectItem>
-                                            {places.map((place) => (
-                                                <SelectItem key={place.id} value={place.id}>
-                                                    {place.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                                <Label htmlFor="edit-place">Place Name</Label>
+                                <Input
+                                    id="edit-place"
+                                    placeholder="Optional Place Name"
+                                    value={editingDonation.placeName}
+                                    onChange={(e) => setEditingDonation({ ...editingDonation, placeName: e.target.value })}
+                                    disabled={!isEditable("placeName")}
+                                />
                             </div>
 
                             <div className="flex items-center space-x-2 pt-2">
@@ -765,53 +581,8 @@ export default function AdminDonationsPage() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="ALL">All Categories</SelectItem>
-                        <SelectItem value="BATCH">Batch</SelectItem>
                         <SelectItem value="GENERAL">General</SelectItem>
                         <SelectItem value="PARENT">Parents</SelectItem>
-                    </SelectContent>
-                </Select>
-                <Select value={batchFilter} onValueChange={setBatchFilter}>
-                    <SelectTrigger className="w-[140px] bg-white">
-                        <SelectValue placeholder="Batch" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">All Batches</SelectItem>
-                        {batches.map((batch) => (
-                            <SelectItem key={batch.id} value={batch.id}>
-                                {batch.name}
-                            </SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
-
-                <Select value={unitFilter} onValueChange={setUnitFilter}>
-                    <SelectTrigger className="w-[140px] bg-white">
-                        <SelectValue placeholder="Unit" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">All Units</SelectItem>
-                        {units.map((unit) => {
-                            const unitPlaces = unit.placeIds?.map(pid => places.find(p => p.id === pid)?.name).filter(Boolean).join(", ")
-                            return (
-                                <SelectItem key={unit.id} value={unit.id}>
-                                    {unit.name} {unitPlaces ? `(${unitPlaces})` : ""}
-                                </SelectItem>
-                            )
-                        })}
-                    </SelectContent>
-                </Select>
-
-                <Select value={placeFilter} onValueChange={setPlaceFilter}>
-                    <SelectTrigger className="w-[140px] bg-white">
-                        <SelectValue placeholder="Place" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="ALL">All Places</SelectItem>
-                        {places.map((place) => (
-                            <SelectItem key={place.id} value={place.id}>
-                                {place.name}
-                            </SelectItem>
-                        ))}
                     </SelectContent>
                 </Select>
             </div>
@@ -824,7 +595,7 @@ export default function AdminDonationsPage() {
                             <TableHead>Date</TableHead>
                             <TableHead>Category</TableHead>
                             <TableHead>Donor</TableHead>
-                            <TableHead>Batch / Unit</TableHead>
+                            <TableHead>Place</TableHead>
                             <TableHead>Coordinator</TableHead>
                             <TableHead>Method</TableHead>
                             <TableHead>Amount</TableHead>
@@ -835,7 +606,7 @@ export default function AdminDonationsPage() {
                     <TableBody>
                         {filteredDonations.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                                <TableCell colSpan={10} className="h-24 text-center text-muted-foreground">
                                     No donations found matching criteria.
                                 </TableCell>
                             </TableRow>
@@ -869,45 +640,18 @@ export default function AdminDonationsPage() {
                                                     </Button>
                                                 )}
                                             </div>}
-                                            {donation.place && <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                                <span className="w-1 h-1 rounded-full bg-slate-400"></span>
-                                                {donation.place.name}
-                                                {isEditable("placeId") && (
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-col text-xs">
+                                            {donation.placeName && <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                {donation.placeName}
+                                                {isEditable("placeName") && (
                                                     <Button variant="ghost" size="icon" className="h-3 w-3 text-muted-foreground hover:text-primary" onClick={() => handleEditClick(donation)}>
                                                         <Pencil className="h-2.5 w-2.5" />
                                                     </Button>
                                                 )}
                                             </span>}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-col text-xs">
-                                            {donation.batch ? (
-                                                <div className="flex items-center gap-1">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                                                    <span className="font-medium">{donation.batch.name}</span>
-                                                    {isEditable("batchId") && (
-                                                        <Button variant="ghost" size="icon" className="h-3 w-3 text-muted-foreground hover:text-primary" onClick={() => handleEditClick(donation)}>
-                                                            <Pencil className="h-2.5 w-2.5" />
-                                                        </Button>
-                                                    )}
-                                                </div>
-                                            ) : <div className="flex items-center gap-1">
-                                                <span className="text-muted-foreground italic">No Batch</span>
-                                                {isEditable("batchId") && (
-                                                    <Button variant="ghost" size="icon" className="h-3 w-3 text-muted-foreground hover:text-primary" onClick={() => handleEditClick(donation)}>
-                                                        <Pencil className="h-2.5 w-2.5" />
-                                                    </Button>
-                                                )}
-                                            </div>}
-                                            {donation.unit && <div className="flex items-center gap-1 mt-0.5">
-                                                <span className="text-muted-foreground">{donation.unit.name}</span>
-                                                {isEditable("unitId") && (
-                                                    <Button variant="ghost" size="icon" className="h-3 w-3 text-muted-foreground hover:text-primary" onClick={() => handleEditClick(donation)}>
-                                                        <Pencil className="h-2.5 w-2.5" />
-                                                    </Button>
-                                                )}
-                                            </div>}
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-sm">

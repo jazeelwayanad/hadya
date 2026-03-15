@@ -28,24 +28,14 @@ export async function GET(req: Request) {
             orderBy: { createdAt: 'desc' },
             take: limit,
             include: {
-                batch: true,
-                place: {
-                    include: {
-                        district: true
-                    }
-                },
-                unit: true
+                collectedBy: { select: { name: true } }
             }
         })
 
         const formatted = transactions.map(tx => {
             const details = []
-            if (tx.batch) details.push(tx.batch.name)
-            if (!tx.batch && !tx.place) details.push("General Donation")
-            if (tx.place) {
-                details.push(tx.place.name)
-                if (tx.place.district) details.push(tx.place.district.name)
-            }
+            if (tx.placeName) details.push(tx.placeName)
+            if (!tx.placeName) details.push("General Donation")
 
             return {
                 id: tx.id,

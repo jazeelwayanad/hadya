@@ -14,17 +14,15 @@ export async function GET() {
         })
         const totalAmount = totalAgg._sum.amount || 0
 
-        // 2. Top Batches (by total amount collected)
-        // Note: We need to aggregate donations by batchId. 
-        // Prisma's groupBy is perfect for this.
-        const topBatchesAgg = await prisma.donation.groupBy({
-            by: ['batchId'],
+        // 2. Top Places (by total amount collected)
+        const topPlacesAgg = await prisma.donation.groupBy({
+            by: ['placeName'],
             _sum: {
                 amount: true
             },
             where: {
                 paymentStatus: "SUCCESS",
-                batchId: { not: null }
+                placeName: { not: null }
             },
             orderBy: {
                 _sum: {
@@ -34,27 +32,17 @@ export async function GET() {
             take: 3
         })
 
-        // Fetch Batch details for the top batches
-        const batchIds = topBatchesAgg.map(item => item.batchId).filter(id => id !== null) as string[]
-        const batches = await prisma.batch.findMany({
-            where: {
-                id: { in: batchIds }
-            }
-        })
-
-        // Combine data
-        const topBatches = topBatchesAgg.map(item => {
-            const batch = batches.find(b => b.id === item.batchId)
+        const topBatches = topPlacesAgg.map((item, index) => {
             return {
-                id: batch?.id,
-                name: batch?.name || "Unknown Batch",
+                id: `place-${index}`,
+                name: item.placeName || "Unknown Place",
                 amount: item._sum.amount || 0
             }
         })
 
         return NextResponse.json({
             totalAmount,
-            topBatches
+            topBatches // keeping the same key for backward compatibility if used in UI
         })
     } catch (error) {
         console.error("Error fetching stats:", error)

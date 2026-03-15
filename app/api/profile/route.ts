@@ -41,10 +41,7 @@ export async function GET() {
                 name: true,
                 username: true,
                 email: true,
-                role: true,
-                batch: {
-                    select: { name: true }
-                }
+                role: true
             }
         });
 

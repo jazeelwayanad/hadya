@@ -16,20 +16,12 @@ export async function GET() {
             where: { paymentStatus: 'SUCCESS' }
         });
 
-        // 3. Total Batches
-        const totalBatches = await prisma.batch.count();
-        const activeBatches = await prisma.batch.count({ where: { status: 'Active' } });
-
-        // 4. Total Units
-        const totalUnits = await prisma.unit.count();
+        // Extinct stats: Batches and Units removed
 
         // 5. Recent Transactions
         const recentDonations = await prisma.donation.findMany({
             take: 5,
             orderBy: { createdAt: 'desc' },
-            include: {
-                batch: { select: { name: true } },
-            }
         });
 
         // 6. Payment Method Stats (for Reports)
@@ -39,17 +31,20 @@ export async function GET() {
             where: { paymentStatus: 'SUCCESS' },
         });
 
-        // 7. Top Batches (for Reports - might be heavy, optimise later if needed)
-        // We can use the totalAmount field in Batch model if we keep it updated.
-        const topBatches = await prisma.batch.findMany({
-            take: 5,
-            orderBy: { totalAmount: 'desc' },
-            select: {
-                name: true,
-                totalAmount: true,
-                _count: { select: { donations: true } }
-            }
+        // 7. Top Places (for Reports)
+        const topPlacesAgg = await prisma.donation.groupBy({
+            by: ['placeName'],
+            _sum: { amount: true },
+            _count: { _all: true },
+            where: { paymentStatus: 'SUCCESS', placeName: { not: null } },
+            orderBy: { _sum: { amount: 'desc' } },
+            take: 5
         });
+        const topPlaces = topPlacesAgg.map(p => ({
+            name: p.placeName || "Unknown",
+            totalAmount: p._sum.amount || 0,
+            _count: { donations: p._count._all }
+        }));
 
         // 8. Monthly Stats (for Reports - Current Month)
         const now = new Date();
@@ -66,15 +61,12 @@ export async function GET() {
             metrics: {
                 totalRevenue,
                 totalDonations,
-                totalBatches,
-                activeBatches,
-                totalUnits,
                 monthlyRevenue: monthlyRevenue._sum.amount || 0
             },
             recentDonations,
             reports: {
                 paymentStats,
-                topBatches
+                topPlaces
             }
         });
 

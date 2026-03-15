@@ -39,10 +39,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
     });
 
     // Get place information
-    const place = donation.placeId ? await prisma.place.findUnique({
-        where: { id: donation.placeId },
-        include: { district: true }
-    }) : null;
+    const placeName = donation.placeName || "N/A";
 
     return (
         <ReceiptContent
@@ -55,7 +52,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
                 mobile: donation.mobile,
                 formattedDate,
                 formattedDateTime,
-                placeName: place ? `${place.name}, ${place.district.name}` : "N/A",
+                placeName: placeName,
                 paymentStatus: donation.paymentStatus,
             }}
         />

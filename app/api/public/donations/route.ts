@@ -9,28 +9,13 @@ export async function POST(req: Request) {
             name,
             mobile,
             hideName,
-            batchId,
-            unitId,
-            placeId,
+            placeName,
             category
         } = body;
 
         // Generate a simple unique transaction ID for reference
-        const transactionId = `txn_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
-        let finalPlaceId = null;
-        let finalDistrictId = null;
-        let finalSectionId = null;
-
-        if (placeId) {
-            if (placeId.startsWith("section-")) {
-                finalSectionId = placeId.replace("section-", "");
-            } else if (placeId.startsWith("district-")) {
-                finalDistrictId = placeId.replace("district-", "");
-            } else {
-                finalPlaceId = placeId;
-            }
-        }
+        // Format to strict alphanumeric without underscores to avoid UPI intent rejection
+        const transactionId = `TXN${Date.now()}${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
 
         const donation = await prisma.donation.create({
             data: {
@@ -38,12 +23,8 @@ export async function POST(req: Request) {
                 name,
                 mobile,
                 hideName: hideName || false,
-                batchId: batchId || null,
-                unitId: unitId || null,
-                placeId: finalPlaceId || null,
-                districtId: finalDistrictId || null,
-                sectionId: finalSectionId || null,
-                category: category || "GENERAL",
+                placeName: placeName || null,
+                category: category === "PARENT" ? "PARENT" : "GENERAL",
                 paymentMethod: "UPI",
                 paymentStatus: "PENDING",
                 transactionId: transactionId

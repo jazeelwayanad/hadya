@@ -44,7 +44,7 @@ export default function AdminReportsPage() {
     if (!stats) return <div className="text-red-500">Failed to load reports.</div>
 
     const { metrics, reports } = stats
-    const { paymentStats, topBatches } = reports
+    const { paymentStats, topPlaces } = reports
 
     // Calculate Payment Method Percentages
     const totalPaymentAmount = paymentStats.reduce((acc: number, curr: any) => acc + (curr._sum.amount || 0), 0)
@@ -144,34 +144,34 @@ export default function AdminReportsPage() {
                     </CardContent>
                 </Card>
 
-                {/* Top Batches */}
+                {/* Top Places */}
                 <Card className="col-span-4">
                     <CardHeader>
-                        <CardTitle>Top Performing Batches</CardTitle>
+                        <CardTitle>Top Performing Places</CardTitle>
                         <CardDescription>
-                            Batches with highest total contributions.
+                            Places with highest total contributions.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Batch</TableHead>
+                                    <TableHead>Place</TableHead>
                                     <TableHead>Donations Count</TableHead>
                                     <TableHead className="text-right">Total Raised</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {topBatches.length === 0 ? (
+                                {topPlaces.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">No data available</TableCell>
                                     </TableRow>
                                 ) : (
-                                    topBatches.map((batch: any) => (
-                                        <TableRow key={batch.name}>
-                                            <TableCell className="font-medium">{batch.name}</TableCell>
-                                            <TableCell>{batch._count.donations}</TableCell>
-                                            <TableCell className="text-right font-bold">₹{batch.totalAmount.toLocaleString()}</TableCell>
+                                    topPlaces.map((place: any) => (
+                                        <TableRow key={place.name}>
+                                            <TableCell className="font-medium">{place.name}</TableCell>
+                                            <TableCell>{place._count.donations}</TableCell>
+                                            <TableCell className="text-right font-bold">₹{place.totalAmount.toLocaleString()}</TableCell>
                                         </TableRow>
                                     ))
                                 )}

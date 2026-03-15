@@ -12,11 +12,11 @@ interface LeaderboardItem {
     name: string;
     amount: number;
     rank?: number;
-    batch?: string;
+    place?: string;
 }
 
 export default function LeaderboardPage() {
-    const [activeTab, setActiveTab] = useState("batches");
+    const [activeTab, setActiveTab] = useState("places");
     const [data, setData] = useState<LeaderboardItem[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -67,7 +67,7 @@ export default function LeaderboardPage() {
             <div className="container px-4 mb-10">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col items-center">
                     <TabsList className="bg-transparent gap-2 items-center justify-center flex-nowrap h-auto mb-6 w-full max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                        {["Batches", "Individuals", "Districts"].map((tab) => (
+                        {["Places", "Individuals"].map((tab) => (
                             <TabsTrigger
                                 key={tab}
                                 value={tab.toLowerCase()}
@@ -103,7 +103,7 @@ export default function LeaderboardPage() {
                                             </div>
                                             <div>
                                                 <p className="font-bold text-lg text-black">{item.name}</p>
-                                                {item.batch && <p className="text-xs text-gray-500 font-medium">{item.batch}</p>}
+                                                {item.place && <p className="text-xs text-gray-500 font-medium">{item.place}</p>}
                                             </div>
                                         </div>
                                         <div className="bg-transparent rounded-full px-4 py-1.5 border border-black/80 text-sm font-bold text-black shadow-none">

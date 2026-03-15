@@ -9,41 +9,10 @@ import { Label } from "@/components/ui/label"
 import { Footer } from "@/components/Footer"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft, QrCode, CreditCard, Loader2, Share2, ChevronDown, Check, Home } from "lucide-react"
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select"
+import { ArrowLeft, Loader2, Check } from "lucide-react"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
 import { PaymentScreens } from "@/components/PaymentScreens"
-
-interface Batch {
-    id: string
-    name: string
-}
-
-interface PlaceItem {
-    id: string
-    name: string
-    type: string
-}
-
-interface DistrictItem {
-    id: string
-    name: string
-    panchayats: PlaceItem[]
-}
-
-interface SectionItem {
-    id: string
-    name: string
-    type: string
-    districts: DistrictItem[]
-}
 
 const countries = [
     { code: "+91", name: "India", iso: "in", flag: "🇮🇳" },
@@ -64,41 +33,21 @@ export default function DonatePage() {
     const [name, setName] = React.useState("")
     const [phone, setPhone] = React.useState("")
     const [hideName, setHideName] = React.useState(false)
-    const [donationCategory, setDonationCategory] = React.useState<"BATCH" | "GENERAL" | "PARENT">("BATCH")
+    const [placeName, setPlaceName] = React.useState("")
 
     // Data state
-    const [batches, setBatches] = React.useState<Batch[]>([])
-    const [sections, setSections] = React.useState<SectionItem[]>([])
     const [loading, setLoading] = React.useState(true)
-
-    // Selection state
-    const [selectedBatch, setSelectedBatch] = React.useState<string>("")
-    const [selectedPlace, setSelectedPlace] = React.useState<string>("")
-    const [activeSection, setActiveSection] = React.useState<string>("") // section id
-    const [placeSearch, setPlaceSearch] = React.useState<string>("")
 
     // Country Code state
     const [countryCode, setCountryCode] = React.useState("+91")
     const [countrySearch, setCountrySearch] = React.useState("")
     const [openCountryDropdown, setOpenCountryDropdown] = React.useState(false)
-
-    // Dropdown state
-    const [openPlaceDropdown, setOpenPlaceDropdown] = React.useState(false)
-    const [openBatchDropdown, setOpenBatchDropdown] = React.useState(false)
-    const dropdownRef = React.useRef<HTMLDivElement>(null)
-    const batchDropdownRef = React.useRef<HTMLDivElement>(null)
     const countryDropdownRef = React.useRef<HTMLDivElement>(null)
 
     const [presets, setPresets] = React.useState<number[]>([500, 1000, 2000, 5000, 10000])
 
     React.useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setOpenPlaceDropdown(false)
-            }
-            if (batchDropdownRef.current && !batchDropdownRef.current.contains(event.target as Node)) {
-                setOpenBatchDropdown(false)
-            }
             if (countryDropdownRef.current && !countryDropdownRef.current.contains(event.target as Node)) {
                 setOpenCountryDropdown(false)
             }
@@ -106,49 +55,6 @@ export default function DonatePage() {
         document.addEventListener("mousedown", handleClickOutside)
         return () => document.removeEventListener("mousedown", handleClickOutside)
     }, [])
-
-    // URL Search Params
-    const searchParams = useSearchParams()
-    const batchIdFromUrl = searchParams.get("batch")
-
-    React.useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [batchesRes, placesRes] = await Promise.all([
-                    fetch("/api/admin/batches"),
-                    fetch("/api/admin/places")
-                ])
-                if (batchesRes.ok) {
-                    const batchesData = await batchesRes.json()
-                    setBatches(batchesData.filter((b: any) => b.status === "Active"))
-
-                    // Auto-select batch if in URL
-                    if (batchIdFromUrl) {
-                        const decodedBatchId = decodeURIComponent(batchIdFromUrl)
-                        const foundBatch = batchesData.find((b: any) =>
-                            (b.slug === decodedBatchId || b.id === decodedBatchId || b.name.toLowerCase() === decodedBatchId.toLowerCase()) &&
-                            b.status === "Active"
-                        )
-                        if (foundBatch) {
-                            setSelectedBatch(foundBatch.id)
-                            setDonationCategory("BATCH")
-                        }
-                    }
-                }
-                if (placesRes.ok) {
-                    const sectionsData: SectionItem[] = await placesRes.json()
-                    setSections(sectionsData)
-                    // Auto-select first section
-                    if (sectionsData.length > 0) setActiveSection(sectionsData[0].id)
-                }
-            } catch (error) {
-                console.error("Error loading data", error)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchData()
-    }, [batchIdFromUrl])
 
     // Fetch preset amounts from settings
     React.useEffect(() => {
@@ -163,48 +69,13 @@ export default function DonatePage() {
                 }
             } catch (error) {
                 console.error("Error loading preset amounts", error)
+            } finally {
+                setLoading(false)
             }
         }
         fetchPresets()
     }, [])
 
-    // Get all places under the active section (flattened from districts)
-    const allSectionPlaces = React.useMemo(() => {
-        const section = sections.find(s => s.id === activeSection)
-        if (!section) return []
-        const places: { id: string; name: string; districtName: string }[] = []
-        if (section.districts.length === 0) {
-            // No children — show section itself
-            places.push({ id: `section-${section.id}`, name: section.name, districtName: section.type })
-        } else {
-            for (const district of section.districts) {
-                if (district.panchayats.length === 0) {
-                    // District has no places — show district itself
-                    places.push({ id: `district-${district.id}`, name: district.name, districtName: section.name })
-                } else {
-                    for (const place of district.panchayats) {
-                        places.push({ id: place.id, name: place.name, districtName: district.name })
-                    }
-                }
-            }
-        }
-        return places
-    }, [sections, activeSection])
-
-    // Filter by search
-    const filteredPlaces = React.useMemo(() => {
-        if (!placeSearch.trim()) return allSectionPlaces
-        const q = placeSearch.toLowerCase()
-        return allSectionPlaces.filter(p => p.name.toLowerCase().includes(q) || p.districtName.toLowerCase().includes(q))
-    }, [allSectionPlaces, placeSearch])
-
-    const selectedPlaceName = React.useMemo(() => {
-        return allSectionPlaces.find(p => p.id === selectedPlace)?.name
-    }, [allSectionPlaces, selectedPlace])
-
-    const selectedBatchName = React.useMemo(() => {
-        return batches.find(b => b.id === selectedBatch)?.name
-    }, [batches, selectedBatch])
 
     const filteredCountries = React.useMemo(() => {
         if (!countrySearch.trim()) return countries
@@ -229,8 +100,6 @@ export default function DonatePage() {
     React.useEffect(() => {
         const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : '';
         const isMobile = Boolean(userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i));
-        // We do not need a state for this if we check right when creating payment, 
-        // but checking on mount is fine too.
     }, [])
 
     const handleSuccess = (data: any) => {
@@ -260,12 +129,8 @@ export default function DonatePage() {
             toast.error("Please enter your mobile number")
             return
         }
-        if (!selectedPlace) {
-            toast.error("Please select a Place/Municipality")
-            return
-        }
-        if (donationCategory === "BATCH" && !selectedBatch) {
-            toast.error("Please select a Batch")
+        if (!placeName) {
+            toast.error("Please enter your Place or Area")
             return
         }
 
@@ -281,10 +146,7 @@ export default function DonatePage() {
                     name,
                     mobile: `${countryCode} ${phone}`,
                     hideName,
-                    batchId: donationCategory === "BATCH" ? selectedBatch : null,
-                    unitId: null,
-                    placeId: selectedPlace,
-                    category: donationCategory,
+                    placeName,
                 })
             });
 
@@ -301,16 +163,23 @@ export default function DonatePage() {
             const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : '';
             const isMobile = Boolean(userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i));
 
-            const campaignTitle = data.campaignTitle || "hadya Ramadan";
+            const campaignTitle = data.campaignTitle || "Hadya Ramadan";
             // Construct UPI Link
-            // upi://pay?pa=UPI_ID&pn=PAYEE_NAME&am=AMOUNT&cu=INR
-            const upiLink = `upi://pay?pa=${data.upiId}&pn=${encodeURIComponent(campaignTitle)}&am=${data.amount}&cu=INR&tr=${data.transactionId}&tn=Donation`;
+            // upi://pay?pa=UPI_ID&pn=PAYEE_NAME&am=AMOUNT&cu=INR&mc=0000
+            const upiLink = `upi://pay?pa=${data.upiId}&pn=${encodeURIComponent(campaignTitle)}&am=${parseFloat(data.amount).toFixed(2)}&cu=INR&mc=0000&tr=${data.transactionId}&tn=Donation`;
 
             if (isMobile) {
                 // If mobile, open UPI app directly, then show success
                 window.location.href = upiLink;
+                
+                // Store receipt data for manual button click, preventing automatic redirect from breaking context
+                setReceiptData({
+                    amount: data.amount,
+                    name: name,
+                    transactionId: data.transactionId,
+                    date: new Date().toLocaleString()
+                });
                 setShowSuccessScreen(true);
-                handleSuccess(data);
             } else {
                 // If desktop, show QR code modal
                 setQrData({
@@ -346,12 +215,22 @@ export default function DonatePage() {
                     </p>
                     <Button
                         onClick={() => {
+                            setShowSuccessScreen(false);
+                            setShowReceipt(true);
+                        }}
+                        className="w-full bg-primary hover:brightness-90 text-white rounded-xl h-11 mb-3"
+                    >
+                        View Receipt
+                    </Button>
+                    <Button
+                        variant="outline"
+                        onClick={() => {
                             setShowSuccessScreen(false)
                             setAmount("")
                             setName("")
                             setPhone("")
                         }}
-                        className="w-full bg-primary hover:brightness-90 text-white rounded-xl h-11"
+                        className="w-full rounded-xl h-11 text-gray-600 border-gray-200"
                     >
                         Make another donation
                     </Button>
@@ -374,8 +253,6 @@ export default function DonatePage() {
             </div>
         )
     }
-
-    // No standard checkout waiting screen anymore, it is instantaneous or opens app
 
     // 2. QR Code Payment Screen (Desktop)
     if (showQrModal && qrData) {
@@ -545,126 +422,24 @@ export default function DonatePage() {
                         </div>
                     </div>
 
-                    {/* Batch / Category Selection */}
-                    <div className="space-y-4" ref={batchDropdownRef}>
-                        <div className="space-y-2">
-                            <Label className="text-xs text-gray-700 font-medium">Payment Category</Label>
-                            <Tabs defaultValue="BATCH" value={donationCategory} onValueChange={(val) => setDonationCategory(val as any)} className="w-full">
-                                <TabsList className="grid w-full grid-cols-3">
-                                    <TabsTrigger value="GENERAL">General</TabsTrigger>
-                                    <TabsTrigger value="BATCH">Batch</TabsTrigger>
-                                    <TabsTrigger value="PARENT">Parents</TabsTrigger>
-                                </TabsList>
-                            </Tabs>
-                        </div>
 
-                        <div className="relative">
-                            <div
-                                onClick={() => donationCategory === "BATCH" && setOpenBatchDropdown(!openBatchDropdown)}
-                                className={`h-12 w-full border border-primary rounded-xl bg-white px-3 flex items-center justify-between cursor-pointer transition-colors ${donationCategory !== "BATCH" ? "opacity-50 cursor-not-allowed bg-gray-50" : "hover:border-primary"}`}
-                            >
-                                <span className={`text-sm ${selectedBatchName ? "text-black" : "text-gray-400"}`}>
-                                    {donationCategory === "BATCH" ? (selectedBatchName || "Select Batch") : (donationCategory === "PARENT" ? "Parent Donation" : "General Donation")}
-                                </span>
-                                {donationCategory === "BATCH" && <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${openBatchDropdown ? "rotate-180" : ""}`} />}
-                            </div>
 
-                            {openBatchDropdown && donationCategory === "BATCH" && (
-                                <div className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                                    <div className="max-h-[220px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-                                        {batches.map(b => (
-                                            <div
-                                                key={b.id}
-                                                onClick={() => {
-                                                    setSelectedBatch(b.id)
-                                                    setOpenBatchDropdown(false)
-                                                }}
-                                                className={`w-full text-left px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-teal-50 flex items-center justify-between cursor-pointer ${selectedBatch === b.id ? "bg-teal-50 text-teal-800 font-medium" : "text-gray-700"
-                                                    }`}
-                                            >
-                                                <span>{b.name}</span>
-                                                {selectedBatch === b.id && <Check className="w-3 h-3 text-teal-600" />}
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="flex justify-center gap-4 pt-3 pb-1">
-                            {sections.map(section => (
-                                <button
-                                    key={section.id}
-                                    onClick={() => { setActiveSection(section.id); setSelectedPlace(""); setPlaceSearch("") }}
-                                    className={`rounded-xl h-10 px-8 font-semibold text-base transition-all border ${activeSection === section.id
-                                        ? "bg-primary text-white border-primary shadow-md"
-                                        : "bg-white border-gray-200 text-black hover:bg-gray-50"
-                                        }`}
-                                >
-                                    {section.name}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Place / Area */}
-                    <div className="space-y-2" ref={dropdownRef}>
-                        <Label className="text-gray-700 font-medium text-xs">Place<span className="text-red-500">*</span></Label>
-
-                        <div className="relative">
-                            <div
-                                onClick={() => setOpenPlaceDropdown(!openPlaceDropdown)}
-                                className="h-12 w-full border border-primary rounded-xl bg-white px-3 flex items-center justify-between cursor-pointer hover:border-primary transition-colors"
-                            >
-                                <span className={`text-sm ${selectedPlaceName ? "text-black" : "text-gray-400"}`}>
-                                    {selectedPlaceName || "Select Place"}
-                                </span>
-
-                                <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${openPlaceDropdown ? "rotate-180" : ""}`} />
-                            </div>
-
-                            {openPlaceDropdown && (
-                                <div className="absolute top-full left-0 w-full mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                                    <Input
-                                        autoFocus
-                                        placeholder="Search..."
-                                        value={placeSearch}
-                                        onChange={(e) => setPlaceSearch(e.target.value)}
-                                        className="h-10 text-sm mb-2 border-gray-200"
-                                        onClick={(e) => e.stopPropagation()}
-                                    />
-                                    <div className="max-h-[220px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
-                                        {filteredPlaces.length === 0 ? (
-                                            <div className="p-3 text-center text-xs text-gray-400">No places found</div>
-                                        ) : (
-                                            filteredPlaces.map(p => (
-                                                <div
-                                                    key={p.id}
-                                                    onClick={() => {
-                                                        setSelectedPlace(p.id)
-                                                        setOpenPlaceDropdown(false)
-                                                        setPlaceSearch("")
-                                                    }}
-                                                    className={`w-full text-left px-3 py-2.5 text-sm rounded-lg transition-colors hover:bg-teal-50 flex items-center justify-between cursor-pointer ${selectedPlace === p.id ? "bg-teal-50 text-teal-800 font-medium" : "text-gray-700"
-                                                        }`}
-                                                >
-                                                    <span>{p.name}</span>
-                                                    <span className="text-[10px] text-gray-400 ml-2">{p.districtName}</span>
-                                                    {selectedPlace === p.id && <Check className="w-3 h-3 text-teal-600" />}
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                    {/* Place / Area Input */}
+                    <div className="space-y-2">
+                        <Label className="text-gray-700 font-medium text-xs">Place / Area<span className="text-red-500">*</span></Label>
+                        <Input
+                            id="place"
+                            placeholder="Enter Place / Municipality name"
+                            value={placeName}
+                            onChange={(e) => setPlaceName(e.target.value)}
+                            className="h-12 border-primary rounded-xl bg-white px-4 text-gray-800 shadow-none placeholder:text-gray-300 focus-visible:ring-2 focus-visible:ring-primary"
+                        />
                     </div>
 
                     {/* Payment Methods */}
                     <div className="space-y-3 pt-2">
                         <Label className="text-xs font-medium text-gray-700">Payment Methods</Label>
                         <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="space-y-3">
-
                             <Label htmlFor="upi" className={`flex items-center justify-between border border-gray-400 rounded-xl px-4 py-3.5 bg-white shadow-none cursor-pointer hover:bg-gray-50 ${paymentMethod === 'upi' ? 'ring-2 ring-black border-transparent' : ''}`}>
                                 <div className="flex items-center gap-4">
                                     <div className="w-8 h-8 flex items-center justify-center">
@@ -674,7 +449,6 @@ export default function DonatePage() {
                                 </div>
                                 <RadioGroupItem value="upi" id="upi" className="w-5 h-5 text-black border-2 border-black" />
                             </Label>
-
                         </RadioGroup>
                     </div>
 
@@ -688,11 +462,6 @@ export default function DonatePage() {
                     </Button>
 
                 </div>
-
-
-
-                {/* Modals are handled higher up inside the component using early returns */}
-
             </div>
             <Footer />
         </div>
