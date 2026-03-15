@@ -75,9 +75,9 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[#FFF9ED] text-foreground font-sans">
       {/* Header Logos */}
-      <header className="container px-6 py-6 flex justify-between items-center">
+      <header className="container px-6 py-6 flex justify-center items-center">
         <img src="/left_side.png" alt="hadya Logo" className="h-14 w-auto object-contain" />
-        <img src="/right_sided.png" alt="College Logo" className="h-14 w-auto object-contain" />
+        {/* <img src="/right_sided.png" alt="College Logo" className="h-14 w-auto object-contain" /> */}
       </header>
 
       {/* Slideshow */}
