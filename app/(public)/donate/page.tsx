@@ -2,15 +2,13 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Footer } from "@/components/Footer"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ArrowLeft, Loader2, Check } from "lucide-react"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { PaymentScreens } from "@/components/PaymentScreens"
 
@@ -92,15 +90,8 @@ export default function DonatePage() {
     const [showReceipt, setShowReceipt] = React.useState(false)
     const [receiptData, setReceiptData] = React.useState<any>(null)
 
-    const [qrData, setQrData] = React.useState<{ upiId: string, donationId: string, qrString?: string, amount: string, name: string, isDesktop: boolean } | null>(null)
+    const [qrData, setQrData] = React.useState<{ upiId: string, donationId: string, qrString?: string, amount: string, name: string, isMobile: boolean } | null>(null)
     const [showQrModal, setShowQrModal] = React.useState(false)
-    const [showSuccessScreen, setShowSuccessScreen] = React.useState(false)
-
-    // Helper to determine if user is on mobile or desktop
-    React.useEffect(() => {
-        const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : '';
-        const isMobile = Boolean(userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i));
-    }, [])
 
     const handleSuccess = (data: any) => {
         setShowQrModal(false);
@@ -159,40 +150,35 @@ export default function DonatePage() {
 
             const data = await res.json();
 
-            // Check if mobile or desktop
+            // Detect mobile
             const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : '';
             const isMobile = Boolean(userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i));
 
-            const campaignTitle = data.campaignTitle || "Hadya Ramadan";
-            // Construct UPI Link
-            // upi://pay?pa=UPI_ID&pn=PAYEE_NAME&am=AMOUNT&cu=INR&mc=0000
-            const upiLink = `upi://pay?pa=${data.upiId}&pn=${encodeURIComponent(campaignTitle)}&am=${parseFloat(data.amount).toFixed(2)}&cu=INR&mc=0000&tr=${data.transactionId}&tn=Donation`;
+            const amt = Number(data.amount);
+            const upiId = String(data.upiId || "").trim();
 
-            if (isMobile) {
-                // If mobile, open UPI app directly, then show success
-                window.location.href = upiLink;
-                
-                // Store receipt data for manual button click, preventing automatic redirect from breaking context
-                setReceiptData({
-                    amount: data.amount,
-                    name: name,
-                    transactionId: data.transactionId,
-                    date: new Date().toLocaleString()
-                });
-                setShowSuccessScreen(true);
-            } else {
-                // If desktop, show QR code modal
-                setQrData({
-                    upiId: data.upiId,
-                    donationId: data.transactionId,
-                    qrString: upiLink,
-                    amount: data.amount.toString(),
-                    name: name,
-                    isDesktop: true
-                });
-                setShowQrModal(true);
+            if (!amt || amt <= 0 || !upiId) {
+                toast.error("Payment configuration error. Please contact support.");
+                setLoading(false);
+                return;
             }
 
+            const safeTitle = encodeURIComponent(
+                (data.campaignTitle || "Donation").substring(0, 30)
+            );
+
+            const upiLink = `upi://pay?pa=${upiId}&pn=${safeTitle}&am=${amt.toFixed(2)}&cu=INR&mode=02`;
+
+            // Show unified payment screen for both mobile and desktop
+            setQrData({
+                upiId,
+                donationId: data.transactionId,
+                qrString: upiLink,
+                amount: amt.toString(),
+                name: name,
+                isMobile,
+            });
+            setShowQrModal(true);
             setLoading(false);
 
         } catch (error) {
@@ -202,42 +188,6 @@ export default function DonatePage() {
         }
     }
 
-    if (showSuccessScreen) {
-        return (
-            <div className="min-h-screen bg-[#FFF9ED] font-sans flex items-center justify-center">
-                <div className="text-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 max-w-sm w-full mx-4">
-                    <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Check className="w-8 h-8 text-primary" />
-                    </div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-2">Payment Initiated</h2>
-                    <p className="text-gray-500 text-sm mb-6">
-                        Your UPI app has been opened. Please complete the payment. The admin will verify it shortly.
-                    </p>
-                    <Button
-                        onClick={() => {
-                            setShowSuccessScreen(false);
-                            setShowReceipt(true);
-                        }}
-                        className="w-full bg-primary hover:brightness-90 text-white rounded-xl h-11 mb-3"
-                    >
-                        View Receipt
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onClick={() => {
-                            setShowSuccessScreen(false)
-                            setAmount("")
-                            setName("")
-                            setPhone("")
-                        }}
-                        className="w-full rounded-xl h-11 text-gray-600 border-gray-200"
-                    >
-                        Make another donation
-                    </Button>
-                </div>
-            </div>
-        )
-    }
 
     if (showReceipt && receiptData) {
         // Redirect to receipt page
@@ -254,21 +204,24 @@ export default function DonatePage() {
         )
     }
 
-    // 2. QR Code Payment Screen (Desktop)
+    // Payment instruction screen (mobile + desktop)
     if (showQrModal && qrData) {
         return (
-            <PaymentScreens
-                type="qr"
-                amount={qrData.amount}
-                name={qrData.name}
-                qrString={qrData.qrString}
-                donationId={qrData.donationId}
-                onCancel={() => {
-                    setShowQrModal(false)
-                    setLoading(false)
-                }}
-                onSuccess={handleSuccess}
-            />
+            <div className="min-h-screen bg-[#FFF9ED] flex items-center justify-center px-4 py-10">
+                <PaymentScreens
+                    amount={qrData.amount}
+                    name={qrData.name}
+                    upiId={qrData.upiId}
+                    qrString={qrData.qrString}
+                    donationId={qrData.donationId}
+                    isMobile={qrData.isMobile}
+                    onCancel={() => {
+                        setShowQrModal(false)
+                        setLoading(false)
+                    }}
+                    onSuccess={handleSuccess}
+                />
+            </div>
         )
     }
 
