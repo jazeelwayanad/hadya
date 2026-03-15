@@ -50,8 +50,8 @@
 :root {
   --radius: 0.625rem;
 
-  /* White & Teal Theme */
-  --background: #FFFFFF;
+  /* Dark Navy + Cream Theme (matches reference design) */
+  --background: #FFF9ED;
   --foreground: #0f172a;
 
   --card: #FFFFFF;
@@ -60,77 +60,80 @@
   --popover: #FFFFFF;
   --popover-foreground: #0f172a;
 
-  --primary: #115e59;
+  /* Primary: dark navy, used for main cards, headers */
+  --primary: #162B40;
   --primary-foreground: #ffffff;
 
-  --secondary: #f0fdfa;
-  --secondary-foreground: #115e59;
+  /* Secondary: soft teal (for muted panels) */
+  --secondary: #E8F4F2;
+  --secondary-foreground: #162B40;
 
-  --muted: #f1f5f9;
+  --muted: #F5EED9;
   --muted-foreground: #64748b;
 
-  --accent: #facc15;
-  --accent-foreground: #0f172a;
+  /* Accent: vibrant teal-green for CTAs like "Contribute Now" */
+  --accent: #2DA99A;
+  --accent-foreground: #ffffff;
 
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
 
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #115e59;
+  --border: #E5D9B6;
+  --input: #E5D9B6;
+  --ring: #2DA99A;
 
-  --chart-1: #115e59;
-  --chart-2: #facc15;
-  --chart-3: #0f172a;
-  --chart-4: #2dd4bf;
+  --chart-1: #162B40;
+  --chart-2: #2DA99A;
+  --chart-3: #facc15;
+  --chart-4: #4EB8AE;
   --chart-5: #94a3b8;
 
-  --sidebar: #FFFFFF;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #115e59;
+  --sidebar: #162B40;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #2DA99A;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0fdfa;
-  --sidebar-accent-foreground: #115e59;
-  --sidebar-border: #e2e8f0;
-  --sidebar-ring: #115e59;
+  --sidebar-accent: #1E3D59;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #1E3D59;
+  --sidebar-ring: #2DA99A;
 }
 
 /* Re-assert custom theme values so they override Tailwind v4's
    @supports (color: lab()) default theme overrides. */
 @supports (color: lab(0% 0 0)) {
   :root {
-    --background: #FFFFFF;
+    --background: #FFF9ED;
     --foreground: #0f172a;
     --card: #FFFFFF;
     --card-foreground: #0f172a;
     --popover: #FFFFFF;
     --popover-foreground: #0f172a;
-    --primary: #115e59;
+    --primary: #162B40;
     --primary-foreground: #ffffff;
-    --secondary: #f0fdfa;
-    --secondary-foreground: #115e59;
-    --muted: #f1f5f9;
+    --secondary: #E8F4F2;
+    --secondary-foreground: #162B40;
+    --muted: #F5EED9;
     --muted-foreground: #64748b;
-    --accent: #facc15;
-    --accent-foreground: #0f172a;
+    --accent: #2DA99A;
+    --accent-foreground: #ffffff;
     --destructive: #ef4444;
     --destructive-foreground: #fafafa;
-    --border: #e2e8f0;
-    --input: #e2e8f0;
-    --ring: #115e59;
-    --chart-1: #115e59;
-    --chart-2: #facc15;
-    --chart-3: #0f172a;
-    --chart-4: #2dd4bf;
+    --border: #E5D9B6;
+    --input: #E5D9B6;
+    --ring: #2DA99A;
+    --chart-1: #162B40;
+    --chart-2: #2DA99A;
+    --chart-3: #facc15;
+    --chart-4: #4EB8AE;
     --chart-5: #94a3b8;
-    --sidebar: #FFFFFF;
-    --sidebar-foreground: #0f172a;
-    --sidebar-primary: #115e59;
+    --sidebar: #162B40;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #2DA99A;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #f0fdfa;
-    --sidebar-accent-foreground: #115e59;
-    --sidebar-border: #e2e8f0;
-    --sidebar-ring: #115e59;
+    --sidebar-accent: #1E3D59;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #1E3D59;
+    --sidebar-ring: #2DA99A;
   }
 }
 
@@ -157,12 +160,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #115E59;
+  background: #2DA99A;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #0f524d;
+  background: #1E8C7E;
 }
 
 /* Hide number input spinners */

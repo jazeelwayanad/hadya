@@ -12,10 +12,8 @@ export async function GET() {
             console.log("No settings found, creating default...");
             settings = await prisma.settings.create({
                 data: {
-                    campaignTitle: "Jariya Fundraising",
-                    upiId: "",
-                    razorpayKeyId: "",
-                    razorpayKeySecret: "",
+                    campaignTitle: "hadya Ramadan",
+                    upiId: process.env.DEFAULT_UPI_ID || "",
                 },
             });
             console.log("Default settings created:", settings);
@@ -38,8 +36,6 @@ export async function PUT(req: Request) {
         console.log("API: Request body:", body);
         const {
             campaignTitle,
-            razorpayKeyId,
-            razorpayKeySecret,
             upiId,
             receiptImage,
             receiptConfig,
@@ -59,7 +55,6 @@ export async function PUT(req: Request) {
                 where: { id: existingSettings.id },
                 data: {
                     campaignTitle,
-                    razorpayKeyId,
                     upiId,
                     receiptImage,
                     receiptConfig,
@@ -73,8 +68,6 @@ export async function PUT(req: Request) {
                 data: {
                     campaignTitle,
                     upiId,
-                    razorpayKeyId,
-                    razorpayKeySecret,
                     receiptImage,
                     receiptConfig,
                     displayStatuses,

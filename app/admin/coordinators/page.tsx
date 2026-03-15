@@ -225,7 +225,7 @@ export default function CoordinatorsPage() {
                 </div>
                 <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm() }}>
                     <DialogTrigger asChild>
-                        <Button className="bg-[#115E59] hover:bg-[#0f504c] text-white">
+                        <Button className="bg-primary hover:brightness-90 text-white">
                             <Plus className="mr-2 h-4 w-4" /> Add Coordinator
                         </Button>
                     </DialogTrigger>
@@ -270,7 +270,7 @@ export default function CoordinatorsPage() {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button onClick={handleSave} disabled={processing} className="bg-[#115E59] hover:bg-[#0f504c] text-white">
+                            <Button onClick={handleSave} disabled={processing} className="bg-primary hover:brightness-90 text-white">
                                 {processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {editMode ? "Save Changes" : "Create Account"}
                             </Button>

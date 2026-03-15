@@ -44,7 +44,7 @@ export default function CoordinatorLeaderboardPage() {
     if (loading) {
         return (
             <div className="flex justify-center items-center min-h-[60vh] bg-[#FFF9ED]">
-                <Loader2 className="w-8 h-8 animate-spin text-[#115E59]" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
@@ -91,11 +91,11 @@ export default function CoordinatorLeaderboardPage() {
                                     </div>
                                     <div className="min-w-0 flex-1 pr-2">
                                         <h3 className="font-bold text-base sm:text-lg text-black truncate">{item.name}</h3>
-                                        <p className="text-[10px] sm:text-xs text-[#115E59] font-bold tracking-wide uppercase">Rank #{item.rank}</p>
+                                        <p className="text-[10px] sm:text-xs text-primary font-bold tracking-wide uppercase">Rank #{item.rank}</p>
                                     </div>
                                 </div>
 
-                                <div className="bg-white/50 backdrop-blur-sm rounded-full px-3 py-1 sm:px-4 sm:py-1.5 border border-[#115E59]/20 text-xs sm:text-sm font-bold text-[#115E59] shadow-sm shrink-0">
+                                <div className="bg-white/50 backdrop-blur-sm rounded-full px-3 py-1 sm:px-4 sm:py-1.5 border border-primary/20 text-xs sm:text-sm font-bold text-primary shadow-sm shrink-0">
                                     {formatCurrency(item.amount)}
                                 </div>
                             </div>

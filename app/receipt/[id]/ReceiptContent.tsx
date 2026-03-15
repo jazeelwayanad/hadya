@@ -62,6 +62,7 @@ interface ReceiptContentProps {
         formattedDate: string;
         formattedDateTime: string;
         placeName: string;
+        paymentStatus: string;
     };
 }
 
@@ -135,7 +136,7 @@ export default function ReceiptContent({ receiptImage, config, donation }: Recei
         { icon: <User className="w-4 h-4 text-white" />, label: "Name", value: donation.name },
         { icon: <MapPin className="w-4 h-4 text-white" />, label: "Place", value: donation.placeName },
         { icon: <Calendar className="w-4 h-4 text-white" />, label: "Date & Time", value: donation.formattedDateTime },
-        { icon: <Building className="w-4 h-4 text-white" />, label: "Organization", value: "Sabeelul Hidaya Islamic College" },
+        { icon: <Building className="w-4 h-4 text-white" />, label: "Organization", value: "Jamia Raheemiyya" },
     ];
 
     const handleBack = () => {
@@ -150,7 +151,7 @@ export default function ReceiptContent({ receiptImage, config, donation }: Recei
         <div className="min-h-screen">
             <div className="relative flex min-h-screen flex-col bg-[#FFF9ED] max-w-[520px] mx-auto shadow-2xl border-x border-gray-200">
                 {/* Header */}
-                <div className="sticky top-0 z-10 bg-[#115e59] px-4 h-14 flex items-center shadow-md">
+                <div className="sticky top-0 z-10 bg-[#162B40] px-4 h-14 flex items-center shadow-md">
                     <button onClick={handleBack} className="mr-3 w-8 h-8 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors">
                         <ArrowLeft className="w-5 h-5 text-white" />
                     </button>
@@ -159,40 +160,72 @@ export default function ReceiptContent({ receiptImage, config, donation }: Recei
 
                 {/* Content */}
                 <div className="p-4">
-                    {/* Receipt Image Card */}
-                    <div className="bg-white rounded-[2rem] p-3 shadow-sm border border-gray-100">
-                        <div
-                            ref={receiptContainerRef}
-                            id="receipt-container"
-                            className="relative overflow-hidden rounded-[1.5rem]"
-                            style={{ maxWidth: "100%", aspectRatio: "auto" }}
-                        >
-                            <img
-                                src={receiptImage}
-                                alt="Receipt"
-                                className="w-full h-auto"
-                            />
+                    {/* Receipt Image Card or Fallback */}
+                    {donation.paymentStatus !== "SUCCESS" ? (
+                        <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 text-center space-y-4">
+                            <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <div className="w-8 h-8 rounded-full border-4 border-amber-500 border-t-transparent animate-spin" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900">Pending Approval</h2>
+                            <p className="text-gray-500 text-sm">Your payment is being verified by an administrator. Please check back later.</p>
+                            <div className="text-3xl font-bold text-amber-600">₹{donation.amount}</div>
+                        </div>
+                    ) : receiptImage ? (
+                        <div className="bg-white rounded-[2rem] p-3 shadow-sm border border-gray-100">
+                            <div
+                                ref={receiptContainerRef}
+                                id="receipt-container"
+                                className="relative overflow-hidden rounded-[1.5rem]"
+                                style={{ maxWidth: "100%", aspectRatio: "auto" }}
+                            >
+                                <img
+                                    src={receiptImage}
+                                    alt="Receipt"
+                                    className="w-full h-auto"
+                                />
 
-                            {/* Overlays */}
-                            {["name", "amount", "date"].map((field) => {
-                                const cfg = config[field] || {};
-                                const value = field === "name"
-                                    ? donation.name
-                                    : field === "amount"
-                                        ? `₹${donation.amount}`
-                                        : donation.formattedDate;
+                                {/* Overlays */}
+                                {["name", "amount", "date"].map((field) => {
+                                    const cfg = config[field] || {};
+                                    if (!cfg.x || !cfg.y) return null; // Skip if config is empty
 
-                                // Transform logic based on alignment
-                                let transform = "translate(-50%, -50%)"; // Default Center
-                                if (cfg.align === "left") transform = "translate(0, -50%)";
-                                if (cfg.align === "right") transform = "translate(-100%, -50%)";
+                                    const value = field === "name"
+                                        ? donation.name
+                                        : field === "amount"
+                                            ? `₹${donation.amount}`
+                                            : donation.formattedDate;
 
-                                if (cfg.maxWidth) {
+                                    // Transform logic based on alignment
+                                    let transform = "translate(-50%, -50%)"; // Default Center
+                                    if (cfg.align === "left") transform = "translate(0, -50%)";
+                                    if (cfg.align === "right") transform = "translate(-100%, -50%)";
+
+                                    if (cfg.maxWidth) {
+                                        return (
+                                            <AutoFitText
+                                                key={field}
+                                                maxWidthPx={cfg.maxWidth}
+                                                className="absolute"
+                                                style={{
+                                                    left: `${cfg.x}%`,
+                                                    top: `${cfg.y}%`,
+                                                    transform: transform,
+                                                    fontSize: `${cfg.fontSize}px`,
+                                                    color: cfg.color,
+                                                    fontWeight: cfg.fontWeight || "bold",
+                                                    letterSpacing: `${cfg.letterSpacing || 0}px`,
+                                                    textAlign: cfg.align || "center",
+                                                }}
+                                            >
+                                                {value}
+                                            </AutoFitText>
+                                        );
+                                    }
+
                                     return (
-                                        <AutoFitText
+                                        <div
                                             key={field}
-                                            maxWidthPx={cfg.maxWidth}
-                                            className="absolute"
+                                            className="absolute whitespace-nowrap"
                                             style={{
                                                 left: `${cfg.x}%`,
                                                 top: `${cfg.y}%`,
@@ -205,38 +238,28 @@ export default function ReceiptContent({ receiptImage, config, donation }: Recei
                                             }}
                                         >
                                             {value}
-                                        </AutoFitText>
+                                        </div>
                                     );
-                                }
-
-                                return (
-                                    <div
-                                        key={field}
-                                        className="absolute whitespace-nowrap"
-                                        style={{
-                                            left: `${cfg.x}%`,
-                                            top: `${cfg.y}%`,
-                                            transform: transform,
-                                            fontSize: `${cfg.fontSize}px`,
-                                            color: cfg.color,
-                                            fontWeight: cfg.fontWeight || "bold",
-                                            letterSpacing: `${cfg.letterSpacing || 0}px`,
-                                            textAlign: cfg.align || "center",
-                                        }}
-                                    >
-                                        {value}
-                                    </div>
-                                );
-                            })}
+                                })}
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div id="receipt-container" className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 text-center space-y-4">
+                            <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                                <Check className="w-8 h-8 text-primary" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900">Donation Successful</h2>
+                            <p className="text-gray-500 text-sm">Thank you for your generous contribution.</p>
+                            <div className="text-3xl font-bold text-primary">₹{donation.amount}</div>
+                        </div>
+                    )}
 
                     {/* Details Card */}
                     <div className="mt-5 bg-white rounded-[2rem] overflow-hidden shadow-sm border border-gray-100">
                         {details.map((detail, index) => (
                             <div key={detail.label}>
                                 <div className="flex items-center gap-3 px-5 py-3.5">
-                                    <div className="w-8 h-8 rounded-full bg-[#115e59] flex items-center justify-center flex-shrink-0">
+                                    <div className="w-8 h-8 rounded-full bg-[#162B40] flex items-center justify-center flex-shrink-0">
                                         {detail.icon}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -252,23 +275,25 @@ export default function ReceiptContent({ receiptImage, config, donation }: Recei
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="mt-6 space-y-3 pb-8">
-                        <Button
-                            onClick={handleShare}
-                            variant="outline"
-                            className="w-full h-12 rounded-full border-2 border-[#115E59] text-[#115E59] hover:bg-teal-50 font-semibold text-sm"
-                        >
-                            <Share2 className="w-4 h-4 mr-2" />
-                            Share Receipt
-                        </Button>
+                    {donation.paymentStatus === "SUCCESS" && (
+                        <div className="mt-6 space-y-3 pb-8">
+                            <Button
+                                onClick={handleShare}
+                                variant="outline"
+                                className="w-full h-12 rounded-full border-2 border-[#162B40] text-[#162B40] hover:bg-[#162B40]/5 font-semibold text-sm"
+                            >
+                                <Share2 className="w-4 h-4 mr-2" />
+                                Share Receipt
+                            </Button>
 
-                        <Button
-                            onClick={handleDownload}
-                            className="w-full h-12 rounded-full bg-[#859F3D] hover:bg-[#6f8533] text-white font-bold text-sm shadow-md"
-                        >
-                            Download Receipt
-                        </Button>
-                    </div>
+                            <Button
+                                onClick={handleDownload}
+                                className="w-full h-12 rounded-full bg-[#162B40] hover:bg-[#1E3D59] text-white font-bold text-sm shadow-md"
+                            >
+                                Download Receipt
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

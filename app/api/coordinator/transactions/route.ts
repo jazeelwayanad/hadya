@@ -22,11 +22,19 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: "No batch assigned" }, { status: 403 });
         }
 
+        const { searchParams } = new URL(req.url);
+        const statusParam = searchParams.get("status");
+
+        const whereClause: any = {
+            batchId: user.batchId,
+        };
+
+        if (statusParam && statusParam !== "ALL") {
+            whereClause.paymentStatus = statusParam;
+        }
+
         const transactions = await prisma.donation.findMany({
-            where: {
-                batchId: user.batchId,
-                paymentStatus: "SUCCESS",
-            },
+            where: whereClause,
             orderBy: {
                 createdAt: "desc",
             },

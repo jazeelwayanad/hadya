@@ -19,8 +19,6 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { toast } from "sonner"
-import { PaymentWaiting } from "@/components/payment/PaymentWaiting"
-import { QRCodePayment } from "@/components/payment/QRCodePayment"
 import { PaymentScreens } from "@/components/PaymentScreens"
 
 interface Batch {
@@ -223,64 +221,31 @@ export default function DonatePage() {
     const [showReceipt, setShowReceipt] = React.useState(false)
     const [receiptData, setReceiptData] = React.useState<any>(null)
 
-    // Payment UI State
-    const [qrData, setQrData] = React.useState<{ imageUrl: string, donationId: string, qrString?: string } | null>(null)
+    const [qrData, setQrData] = React.useState<{ upiId: string, donationId: string, qrString?: string, amount: string, name: string, isDesktop: boolean } | null>(null)
     const [showQrModal, setShowQrModal] = React.useState(false)
-    const [showPaymentWaiting, setShowPaymentWaiting] = React.useState(false)
-    const [paymentOrderId, setPaymentOrderId] = React.useState("")
-    const [isCheckingStatus, setIsCheckingStatus] = React.useState(false)
+    const [showSuccessScreen, setShowSuccessScreen] = React.useState(false)
 
-    // Helper to check status
-    const checkQrStatus = React.useCallback(async () => {
-        if (!qrData?.donationId) return;
-        setIsCheckingStatus(true);
-        try {
-            const res = await fetch(`/api/razorpay/status?donationId=${qrData.donationId}`);
-            const data = await res.json();
-            if (data.status === 'SUCCESS') {
-                setShowQrModal(false);
-                setQrData(null);
-                setReceiptData({
-                    amount: amount,
-                    name: name,
-                    transactionId: qrData.donationId,
-                    date: new Date().toLocaleString()
-                });
-                setShowReceipt(true);
-                toast.success("Payment Received Successfully!");
-            }
-        } catch (e) {
-            console.error("Polling error", e);
-        } finally {
-            setIsCheckingStatus(false);
-        }
-    }, [qrData, amount, name]);
-
-    // Poll for QR Status
+    // Helper to determine if user is on mobile or desktop
     React.useEffect(() => {
-        let interval: NodeJS.Timeout;
-        if (showQrModal && qrData?.donationId) {
-            interval = setInterval(() => {
-                checkQrStatus(); // Silent poll
-            }, 3000);
-        }
-        return () => clearInterval(interval);
-    }, [showQrModal, qrData, checkQrStatus]);
+        const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : '';
+        const isMobile = Boolean(userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i));
+        // We do not need a state for this if we check right when creating payment, 
+        // but checking on mount is fine too.
+    }, [])
 
-
-    const loadRazorpay = () => {
-        return new Promise((resolve) => {
-            const script = document.createElement('script');
-            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-            script.onload = () => {
-                resolve(true);
-            };
-            script.onerror = () => {
-                resolve(false);
-            };
-            document.body.appendChild(script);
+    const handleSuccess = (data: any) => {
+        setShowQrModal(false);
+        setQrData(null);
+        setReceiptData({
+            amount: data.amount,
+            name: data.name,
+            transactionId: data.transactionId,
+            date: new Date().toLocaleString()
         });
+        setShowReceipt(true);
+        toast.success("Donation details submitted! Pending Admin Approval.");
     };
+
 
     const handlePayment = async () => {
         if (!amount) {
@@ -307,156 +272,92 @@ export default function DonatePage() {
         setLoading(true);
 
         try {
-            // === QR CODE FLOW ===
-            if (paymentMethod === 'qr') {
-                const res = await fetch("/api/razorpay/qr", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        amount,
-                        name,
-                        mobile: `${countryCode} ${phone}`,
-                        hideName,
-                        batchId: donationCategory === "BATCH" ? selectedBatch : null,
-                        unitId: null,
-                        placeId: selectedPlace,
-                        category: donationCategory,
-                    })
-                });
+            // Create PENDING donation
+            const res = await fetch("/api/public/donations", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    amount,
+                    name,
+                    mobile: `${countryCode} ${phone}`,
+                    hideName,
+                    batchId: donationCategory === "BATCH" ? selectedBatch : null,
+                    unitId: null,
+                    placeId: selectedPlace,
+                    category: donationCategory,
+                })
+            });
 
-                if (!res.ok) {
-                    const err = await res.json();
-                    toast.error(err.error || "Failed to generate QR");
-                    setLoading(false);
-                    return;
-                }
+            if (!res.ok) {
+                const err = await res.json();
+                toast.error(err.error || "Failed to initiate payment");
+                setLoading(false);
+                return;
+            }
 
-                const data = await res.json();
-                console.log("QR Response Data:", data);
+            const data = await res.json();
+
+            // Check if mobile or desktop
+            const userAgent = typeof window !== 'undefined' ? window.navigator.userAgent : '';
+            const isMobile = Boolean(userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i));
+
+            const campaignTitle = data.campaignTitle || "hadya Ramadan";
+            // Construct UPI Link
+            // upi://pay?pa=UPI_ID&pn=PAYEE_NAME&am=AMOUNT&cu=INR
+            const upiLink = `upi://pay?pa=${data.upiId}&pn=${encodeURIComponent(campaignTitle)}&am=${data.amount}&cu=INR&tr=${data.transactionId}&tn=Donation`;
+
+            if (isMobile) {
+                // If mobile, open UPI app directly, then show success
+                window.location.href = upiLink;
+                setShowSuccessScreen(true);
+                handleSuccess(data);
+            } else {
+                // If desktop, show QR code modal
                 setQrData({
-                    imageUrl: data.qr_image_url,
-                    donationId: data.donationId,
-                    qrString: data.qr_string
+                    upiId: data.upiId,
+                    donationId: data.transactionId,
+                    qrString: upiLink,
+                    amount: data.amount.toString(),
+                    name: name,
+                    isDesktop: true
                 });
                 setShowQrModal(true);
-                setLoading(false);
             }
-            // === STANDARD CHECKOUT FLOW (UPI Apps, Cards) ===
-            else {
-                const res = await loadRazorpay();
 
-                if (!res) {
-                    toast.error('Razorpay SDK failed to load. Are you online?');
-                    setLoading(false);
-                    return;
-                }
-
-                // 1. Create Order
-                const orderRes = await fetch("/api/razorpay/order", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        amount,
-                        name,
-                        mobile: `${countryCode} ${phone}`,
-                        hideName,
-                        batchId: donationCategory === "BATCH" ? selectedBatch : null,
-                        unitId: null,
-                        placeId: selectedPlace,
-                        category: donationCategory,
-                    })
-                })
-
-                if (!orderRes.ok) {
-                    const errorData = await orderRes.json()
-                    toast.error(errorData.error || "Failed to create order")
-                    setLoading(false);
-                    return
-                }
-
-                const orderData = await orderRes.json();
-                setPaymentOrderId(orderData.id); // Save Order ID for reference
-                setShowPaymentWaiting(true); // Show Waiting Screen
-
-                // Determine Config ID based on payment method
-                let configId = undefined;
-                if (paymentMethod === 'upi') {
-                    configId = process.env.NEXT_PUBLIC_RAZORPAY_CONFIG_UPI;
-                } else if (paymentMethod === 'card') {
-                    configId = process.env.NEXT_PUBLIC_RAZORPAY_CONFIG_ALL;
-                }
-
-                console.log(`Using Razorpay Config: ${configId} for method: ${paymentMethod}`);
-
-                // 2. Open Razorpay Checkout
-                const options: any = {
-                    key: orderData.keyId,
-                    amount: orderData.amount,
-                    currency: orderData.currency,
-                    name: "Jariya Fundraising | Sabeelul Hidaya Islamic College",
-                    description: "Donation Transaction",
-                    order_id: orderData.id,
-                    config_id: configId, // Pass the Configuration ID
-                    handler: async function (response: any) {
-                        // 3. Verify Payment
-                        const verifyRes = await fetch("/api/razorpay/verify", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                razorpay_order_id: response.razorpay_order_id,
-                                razorpay_payment_id: response.razorpay_payment_id,
-                                razorpay_signature: response.razorpay_signature,
-                            })
-                        })
-
-                        const verifyData = await verifyRes.json();
-
-                        if (verifyData.status === 'success') {
-                            toast.success("Donation successful!");
-                            setShowPaymentWaiting(false); // Hide waiting screen
-                            setReceiptData({
-                                amount: amount,
-                                name: name,
-                                transactionId: verifyData.donation.transactionId,
-                                date: new Date().toLocaleString()
-                            });
-                            setShowReceipt(true);
-                        } else {
-                            toast.error("Payment verification failed. Please contact support.");
-                            setShowPaymentWaiting(false);
-                        }
-                        setLoading(false);
-                    },
-                    prefill: {
-                        name: name,
-                        contact: `${countryCode} ${phone}`
-                    },
-                    notes: {
-                        name: name,
-                        contact: `${countryCode} ${phone}`,
-                        address: "Jariya Fund Raising Sabeelul Hidaya Islamic College"
-                    },
-                    theme: {
-                        color: "#126C72" // Updated color to match UI
-                    },
-                    modal: {
-                        ondismiss: function () {
-                            setLoading(false);
-                            setShowPaymentWaiting(false);
-                            toast("Payment cancelled");
-                        }
-                    }
-                };
-
-                const paymentObject = new (window as any).Razorpay(options);
-                paymentObject.open();
-            }
+            setLoading(false);
 
         } catch (error) {
             console.error("Error submitting donation", error)
             toast.error("An error occurred. Please try again.")
             setLoading(false);
         }
+    }
+
+    if (showSuccessScreen) {
+        return (
+            <div className="min-h-screen bg-[#FFF9ED] font-sans flex items-center justify-center">
+                <div className="text-center p-8 bg-white rounded-2xl shadow-sm border border-gray-100 max-w-sm w-full mx-4">
+                    <div className="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Check className="w-8 h-8 text-primary" />
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-2">Payment Initiated</h2>
+                    <p className="text-gray-500 text-sm mb-6">
+                        Your UPI app has been opened. Please complete the payment. The admin will verify it shortly.
+                    </p>
+                    <Button
+                        onClick={() => {
+                            setShowSuccessScreen(false)
+                            setAmount("")
+                            setName("")
+                            setPhone("")
+                        }}
+                        className="w-full bg-primary hover:brightness-90 text-white rounded-xl h-11"
+                    >
+                        Make another donation
+                    </Button>
+                </div>
+            </div>
+        )
     }
 
     if (showReceipt && receiptData) {
@@ -467,54 +368,35 @@ export default function DonatePage() {
         return (
             <div className="min-h-screen bg-[#FFF9ED] font-sans flex items-center justify-center">
                 <div className="text-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-[#115E59] mx-auto" />
+                    <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
                     <p className="mt-4 text-gray-600">Redirecting to receipt...</p>
                 </div>
             </div>
         )
     }
 
-    // 1. Payment Waiting (Standard Checkout)
-    if (showPaymentWaiting) {
-        return (
-            <PaymentWaiting
-                amount={amount}
-                payerName={name}
-                mobile={`${countryCode} ${phone}`}
-                organization="Sabeelul Hidaya Islamic College"
-                referenceId={paymentOrderId}
-                onBack={() => {
-                    // Logic to cancel/back? 
-                    // Technically Razorpay frame might still be open. 
-                    // Ideally we should close it if we could, but here we just go back to form.
-                    setShowPaymentWaiting(false)
-                    setLoading(false)
-                }}
-            />
-        )
-    }
+    // No standard checkout waiting screen anymore, it is instantaneous or opens app
 
-    // 2. QR Code Payment Screen
+    // 2. QR Code Payment Screen (Desktop)
     if (showQrModal && qrData) {
         return (
-            <QRCodePayment
-                amount={amount}
-                payerName={name}
-                description="Donation Transaction"
-                organization="Sabeelul Hidaya Islamic College" // Or fetch from config
-                qrUrl={qrData.imageUrl}
+            <PaymentScreens
+                type="qr"
+                amount={qrData.amount}
+                name={qrData.name}
+                qrString={qrData.qrString}
+                donationId={qrData.donationId}
                 onCancel={() => {
                     setShowQrModal(false)
                     setLoading(false)
                 }}
-                onCheckStatus={checkQrStatus}
-                isCheckingStatus={isCheckingStatus}
+                onSuccess={handleSuccess}
             />
         )
     }
 
     // 3. Loading (General)
-    if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#FFF9ED]"><Loader2 className="h-8 w-8 animate-spin text-[#115E59]" /></div>
+    if (loading) return <div className="min-h-screen flex items-center justify-center bg-[#FFF9ED]"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
 
     // 4. Main Form
     return (
@@ -546,7 +428,7 @@ export default function DonatePage() {
                                     setAmount(val);
                                 }
                             }}
-                            className="h-12 border-[#115E59] rounded-xl bg-white text-base px-4 shadow-none placeholder:text-gray-300 text-gray-800 focus-visible:ring-2 focus-visible:ring-[#115E59]"
+                            className="h-12 border-primary rounded-xl bg-white text-base px-4 shadow-none placeholder:text-gray-300 text-gray-800 focus-visible:ring-2 focus-visible:ring-primary"
                             type="text"
                             inputMode="decimal"
                         />
@@ -582,7 +464,7 @@ export default function DonatePage() {
                             placeholder="Enter Name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
-                            className="h-12 border-[#115E59] rounded-xl bg-white px-4 text-gray-800 shadow-none placeholder:text-gray-300 focus-visible:ring-2 focus-visible:ring-[#115E59]"
+                            className="h-12 border-primary rounded-xl bg-white px-4 text-gray-800 shadow-none placeholder:text-gray-300 focus-visible:ring-2 focus-visible:ring-primary"
                         />
                     </div>
 
@@ -656,7 +538,7 @@ export default function DonatePage() {
                                         setPhone(val);
                                     }
                                 }}
-                                className="h-12 border-[#115E59] rounded-xl text-gray-800 bg-white pl-[90px] px-4 pl-20 shadow-none placeholder:text-gray-300 focus-visible:ring-2 focus-visible:ring-[#115E59]"
+                                className="h-12 border-primary rounded-xl text-gray-800 bg-white pl-[90px] px-4 pl-20 shadow-none placeholder:text-gray-300 focus-visible:ring-2 focus-visible:ring-primary"
                                 type="text"
                                 inputMode="numeric"
                             />
@@ -679,7 +561,7 @@ export default function DonatePage() {
                         <div className="relative">
                             <div
                                 onClick={() => donationCategory === "BATCH" && setOpenBatchDropdown(!openBatchDropdown)}
-                                className={`h-12 w-full border border-[#115E59] rounded-xl bg-white px-3 flex items-center justify-between cursor-pointer transition-colors ${donationCategory !== "BATCH" ? "opacity-50 cursor-not-allowed bg-gray-50" : "hover:border-[#115E59]"}`}
+                                className={`h-12 w-full border border-primary rounded-xl bg-white px-3 flex items-center justify-between cursor-pointer transition-colors ${donationCategory !== "BATCH" ? "opacity-50 cursor-not-allowed bg-gray-50" : "hover:border-primary"}`}
                             >
                                 <span className={`text-sm ${selectedBatchName ? "text-black" : "text-gray-400"}`}>
                                     {donationCategory === "BATCH" ? (selectedBatchName || "Select Batch") : (donationCategory === "PARENT" ? "Parent Donation" : "General Donation")}
@@ -715,7 +597,7 @@ export default function DonatePage() {
                                     key={section.id}
                                     onClick={() => { setActiveSection(section.id); setSelectedPlace(""); setPlaceSearch("") }}
                                     className={`rounded-xl h-10 px-8 font-semibold text-base transition-all border ${activeSection === section.id
-                                        ? "bg-[#115E59] text-white border-[#115E59] shadow-md"
+                                        ? "bg-primary text-white border-primary shadow-md"
                                         : "bg-white border-gray-200 text-black hover:bg-gray-50"
                                         }`}
                                 >
@@ -732,7 +614,7 @@ export default function DonatePage() {
                         <div className="relative">
                             <div
                                 onClick={() => setOpenPlaceDropdown(!openPlaceDropdown)}
-                                className="h-12 w-full border border-[#115E59] rounded-xl bg-white px-3 flex items-center justify-between cursor-pointer hover:border-[#115E59] transition-colors"
+                                className="h-12 w-full border border-primary rounded-xl bg-white px-3 flex items-center justify-between cursor-pointer hover:border-primary transition-colors"
                             >
                                 <span className={`text-sm ${selectedPlaceName ? "text-black" : "text-gray-400"}`}>
                                     {selectedPlaceName || "Select Place"}
@@ -788,77 +670,28 @@ export default function DonatePage() {
                                     <div className="w-8 h-8 flex items-center justify-center">
                                         <img src="https://upload.wikimedia.org/wikipedia/commons/e/e1/UPI-Logo-vector.svg" alt="UPI" className="w-full h-full object-contain" />
                                     </div>
-                                    <span className="font-semibold text-base text-gray-800">UPI Apps</span>
+                                    <span className="font-semibold text-base text-gray-800">Pay via UPI App / QR</span>
                                 </div>
                                 <RadioGroupItem value="upi" id="upi" className="w-5 h-5 text-black border-2 border-black" />
                             </Label>
-                            {/* 
-                            <Label htmlFor="qr" className={`flex items-center justify-between border border-gray-400 rounded-xl px-4 py-3.5 bg-white shadow-none cursor-pointer hover:bg-gray-50 ${paymentMethod === 'qr' ? 'ring-2 ring-black border-transparent' : ''}`}>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-8 h-8 flex items-center justify-center">
-                                        <QrCode className="w-7 h-7 text-black" />
-                                    </div>
-                                    <span className="font-semibold text-base text-gray-800">Scan UPI QR Code</span>
-                                </div>
-                                <RadioGroupItem value="qr" id="qr" className="w-5 h-5 text-black border-2 border-black" />
-                            </Label> */}
 
-                            <Label htmlFor="card" className={`flex items-center justify-between border border-gray-400 rounded-xl px-4 py-3.5 bg-white shadow-none cursor-pointer hover:bg-gray-50 ${paymentMethod === 'card' ? 'ring-2 ring-black border-transparent' : ''}`}>
-                                <div className="flex items-center gap-4">
-                                    <div className="w-8 h-8 flex items-center justify-center">
-                                        <CreditCard className="w-7 h-7 text-black" />
-                                    </div>
-                                    <span className="font-semibold text-base text-gray-800">Cards, Netbanking, UPI, Wallet</span>
-                                </div>
-                                <RadioGroupItem value="card" id="card" className="w-5 h-5 text-black border-2 border-black" />
-                            </Label>
                         </RadioGroup>
                     </div>
 
-                    <Button onClick={handlePayment} className="w-full h-12 text-xl font-bold rounded-[1.25rem] bg-[#115E59] hover:bg-[#0d4a46] mt-4 shadow-lg text-white">
-                        Continue to Pay
+                    {/* Pay Button */}
+                    <Button
+                        onClick={handlePayment}
+                        disabled={loading || !amount || parseFloat(amount) <= 0}
+                        className="w-full h-14 bg-primary hover:brightness-90 text-white text-lg font-bold rounded-2xl shadow-md transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed mt-4"
+                    >
+                        {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Proceed to Pay"}
                     </Button>
 
                 </div>
 
 
 
-
-                {/* Payment Modals */}
-                {showQrModal && qrData && (
-                    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-                        <QRCodePayment
-                            amount={amount}
-                            payerName={name}
-                            description="Donation Transaction"
-                            organization="Simulated Organization"
-                            qrUrl={qrData.imageUrl}
-                            qrString={qrData.qrString}
-                            onCancel={() => {
-                                setShowQrModal(false);
-                                setQrData(null);
-                            }}
-                            onCheckStatus={checkQrStatus}
-                            isCheckingStatus={isCheckingStatus}
-                        />
-                    </div>
-                )}
-
-                {showPaymentWaiting && (
-                    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-                        <PaymentWaiting
-                            amount={amount}
-                            payerName={name}
-                            mobile={phone}
-                            organization="Samastha Centenary International Conference"
-                            referenceId={paymentOrderId}
-                            onBack={() => {
-                                setShowPaymentWaiting(false);
-                                setPaymentOrderId("");
-                            }}
-                        />
-                    </div>
-                )}
+                {/* Modals are handled higher up inside the component using early returns */}
 
             </div>
             <Footer />

@@ -114,7 +114,7 @@ CREATE TABLE "Donation" (
 -- CreateTable
 CREATE TABLE "Settings" (
     "id" TEXT NOT NULL,
-    "campaignTitle" TEXT NOT NULL DEFAULT 'Jariya Fundraising',
+    "campaignTitle" TEXT NOT NULL DEFAULT 'hadya Ramadan',
     "campaignStatus" TEXT NOT NULL DEFAULT 'ACTIVE',
     "totalAmountCached" DOUBLE PRECISION NOT NULL DEFAULT 0,
     "bannerImage" TEXT,

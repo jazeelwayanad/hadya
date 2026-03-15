@@ -19,13 +19,8 @@ export async function GET(request: Request) {
         if (unitId) where.unitId = unitId;
 
         // If specific status requested (e.g. from filter dropdown), use it
-        if (status) {
+        if (status && status !== 'ALL') {
             where.paymentStatus = status as PaymentStatus;
-        } else {
-            // Otherwise, apply global display settings
-            const settings = await prisma.settings.findFirst();
-            const displayStatuses = settings?.displayStatuses || ["SUCCESS"]; // Default safe fallback
-            where.paymentStatus = { in: displayStatuses };
         }
 
         if (search) {

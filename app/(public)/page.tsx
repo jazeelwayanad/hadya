@@ -76,7 +76,7 @@ export default function Home() {
     <div className="min-h-screen bg-[#FFF9ED] text-foreground font-sans">
       {/* Header Logos */}
       <header className="container px-6 py-6 flex justify-between items-center">
-        <img src="/left_side.png" alt="Jariya Logo" className="h-14 w-auto object-contain" />
+        <img src="/left_side.png" alt="hadya Logo" className="h-14 w-auto object-contain" />
         <img src="/right_sided.png" alt="College Logo" className="h-14 w-auto object-contain" />
       </header>
 
@@ -87,13 +87,13 @@ export default function Home() {
 
       {/* Collection Card */}
       <section className="container px-4 mb-8">
-        <div className="bg-[#115e59] rounded-[2.5rem] pt-10 pb-16 px-6 text-center text-white relative overflow-hidden mx-auto">
+        <div className="bg-[#162B40] rounded-[2.5rem] pt-10 pb-16 px-6 text-center text-white relative overflow-hidden mx-auto">
           <div className="flex items-center justify-center gap-2 mb-2 opacity-90">
             <Wallet className="w-5 h-5 text-white" />
             <span className="text-lg font-medium tracking-wide">Together We Collected</span>
           </div>
 
-          <div className="bg-[#1A6D66] rounded-2xl py-3 px-6 inline-block mb-8 w-full max-w-sm mx-auto shadow-inner">
+          <div className="bg-[#1E3D59] rounded-2xl py-3 px-6 inline-block mb-8 w-full max-w-sm mx-auto shadow-inner">
             <h2 className="text-4xl font-bold tracking-wider">
               {loading ? <Loader2 className="w-8 h-8 animate-spin mx-auto" /> : formatCurrency(totalAmount)}
             </h2>
@@ -101,12 +101,12 @@ export default function Home() {
 
           <div className="flex justify-center gap-4 relative z-10 w-full max-w-sm mx-auto">
             <Link href="/leaderboard" className="flex-1">
-              <Button className="w-full rounded-full bg-[#2D7A75] border-none text-white hover:bg-[#256661] hover:text-white px-2 py-5 shadow-sm text-sm font-medium">
+              <Button className="w-full rounded-full bg-[#1E3D59] border-none text-white hover:bg-[#243F5E] hover:text-white px-2 py-5 shadow-sm text-sm font-medium">
                 Toppers
               </Button>
             </Link>
             <Link href="/transactions" className="flex-1">
-              <Button className="w-full rounded-full bg-[#2D7A75] border-none text-white hover:bg-[#256661] hover:text-white px-2 py-5 shadow-sm text-sm font-medium">
+              <Button className="w-full rounded-full bg-[#1E3D59] border-none text-white hover:bg-[#243F5E] hover:text-white px-2 py-5 shadow-sm text-sm font-medium">
                 Transactions
               </Button>
             </Link>
@@ -116,7 +116,7 @@ export default function Home() {
         {/* Contribute Button - Floating overlap */}
         <div className="mt-[-45px] flex justify-center relative z-20">
           <Link href="/donate">
-            <Button className="rounded-full bg-[#859F3D] hover:bg-[#6f8533] text-white text-lg font-bold px-23 py-4 h-auto border-[7px] border-[#FFF9ED]">
+            <Button className="rounded-full bg-[#2DA99A] hover:bg-[#1E8C7E] text-white text-lg font-bold px-23 py-4 h-auto border-[7px] border-[#FFF9ED]">
               Contribute Now
             </Button>
           </Link>
@@ -124,8 +124,8 @@ export default function Home() {
       </section>
 
       {/* Leading Today Section */}
-      <section className="container px-4 py-6 bg-white">
-        <h3 className="text-center text-xl font-bold mb-5 text-black">Leading Today</h3>
+      <section className="container px-4 py-6 bg-[#FFF9ED]">
+        <h3 className="text-center text-xl font-bold mb-5 text-[#162B40]">Leading Today</h3>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col items-center text-gray-800">
           <TabsList className="bg-transparent items-center justify-center gap-2 flex-nowrap h-auto mb-6 w-full max-w-full overflow-x-auto overflow-y-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden text-gray-800">
             {["Batches", "Individuals", "Districts"].map((tab) => (
@@ -153,7 +153,7 @@ export default function Home() {
                   <div key={i} className="bg-[#FFF1C5]/40 rounded-3xl p-3 pl-4 flex items-center justify-between  border-none">
                     <div className="flex items-center gap-3">
                       <div className="relative">
-                        <div className="w-12 h-12 rounded-full bg-[#115e59] flex items-center justify-center text-white font-bold text-lg shadow-sm ">
+                        <div className="w-12 h-12 rounded-full bg-[#162B40] flex items-center justify-center text-white font-bold text-lg shadow-sm ">
                           {rank}
                         </div>
                         {starColor && (
@@ -187,10 +187,10 @@ export default function Home() {
           <h3 className="font-bold text-lg mb-1 text-black">Need Support?</h3>
           <p className="text-gray-500 text-sm mb-5">We Are here to help!</p>
           <div className="flex gap-4">
-            <Button className="rounded-full bg-[#115e59] hover:bg-[#0f504c] text-white shadow-md h-10 px-6 text-sm font-medium">
+            <Button className="rounded-full bg-[#115e59] hover:brightness-90 text-white shadow-md h-10 px-6 text-sm font-medium">
               <MessageCircle className="w-4 h-4 mr-2" /> WhatsApp
             </Button>
-            <Button className="rounded-full bg-[#115e59] hover:bg-[#0f504c] text-white shadow-md h-10 px-6 text-sm font-medium">
+            <Button className="rounded-full bg-[#115e59] hover:brightness-90 text-white shadow-md h-10 px-6 text-sm font-medium">
               <Phone className="w-4 h-4 mr-2" /> Call
             </Button>
           </div>
@@ -205,9 +205,9 @@ export default function Home() {
       {/* Spread the Word Section */}
       <section className="container px-4 my-4">
         <div className="bg-white rounded-[2rem] p-6">
-          <h3 className="font-bold text-lg mb-1 text-black">Spread the word</h3>
-          <p className="text-gray-500 text-sm mb-5">Be a part of this good deed - share and support the fundraising.</p>
-          <Button className="w-full rounded-full bg-[#115e59] hover:bg-[#0f504c] h-12 text-base text-white shadow-md font-medium">
+          <h3 className="font-bold text-lg mb-1 text-[#162B40]">Spread the word</h3>
+          <p className="text-gray-500 text-sm mb-5">Be a part of this good deed - share and support the Ramadan.</p>
+          <Button className="w-full rounded-full bg-[#162B40] hover:bg-[#1E3D59] h-12 text-base text-white shadow-md font-medium">
             <Share2 className="w-4 h-4 mr-2" /> Share the Campaign
           </Button>
         </div>

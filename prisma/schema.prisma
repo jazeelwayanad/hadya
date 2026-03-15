@@ -8,19 +8,127 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(STAFF)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Coordinator fields
-  username  String?  @unique
-  batchId   String?
-  batch     Batch?   @relation(fields: [batchId], references: [id])
+  id                 String     @id @default(cuid())
+  name               String
+  email              String     @unique
+  password           String
+  role               Role       @default(STAFF)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  username           String?    @unique
+  batchId            String?
   collectedDonations Donation[] @relation("CollectedBy")
+  batch              Batch?     @relation(fields: [batchId], references: [id])
+}
+
+model Section {
+  id        String      @id @default(cuid())
+  name      String
+  type      SectionType
+  category  String      @default("KERALA")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  districts District[]
+  donations Donation[]
+}
+
+model District {
+  id        String     @id @default(cuid())
+  name      String
+  sectionId String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  section   Section    @relation(fields: [sectionId], references: [id])
+  donations Donation[]
+  places    Place[]
+}
+
+model Place {
+  id         String     @id @default(cuid())
+  name       String
+  type       PlaceType
+  districtId String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+  donations  Donation[]
+  district   District   @relation(fields: [districtId], references: [id])
+}
+
+model Unit {
+  id        String     @id @default(cuid())
+  name      String
+  placeIds  String[]
+  status    UnitStatus @default(Active)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  donations Donation[]
+}
+
+model Batch {
+  id           String      @id @default(cuid())
+  name         String      @unique
+  slug         String?     @unique
+  year         String
+  description  String?
+  status       BatchStatus @default(Active)
+  totalAmount  Float       @default(0)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  donations    Donation[]
+  coordinators User[]
+}
+
+model Donation {
+  id            String           @id @default(cuid())
+  amount        Float
+  name          String?
+  mobile        String?
+  hideName      Boolean          @default(false)
+  batchId       String?
+  unitId        String?
+  placeId       String?
+  districtId    String?
+  sectionId     String?
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus    @default(PENDING)
+  transactionId String?          @unique
+  category      DonationCategory @default(GENERAL)
+  collectedById String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  batch         Batch?           @relation(fields: [batchId], references: [id])
+  collectedBy   User?            @relation("CollectedBy", fields: [collectedById], references: [id])
+  district      District?        @relation(fields: [districtId], references: [id])
+  place         Place?           @relation(fields: [placeId], references: [id])
+  section       Section?         @relation(fields: [sectionId], references: [id])
+  unit          Unit?            @relation(fields: [unitId], references: [id])
+}
+
+model Settings {
+  id                String          @id @default(cuid())
+  campaignTitle     String          @default("hadya Ramadan")
+  totalAmountCached Float           @default(0)
+  razorpayKeyId     String?
+  razorpayKeySecret String?
+  upiId             String?
+  receiptImage      String?
+  receiptConfig     Json?
+  displayStatuses   PaymentStatus[] @default([SUCCESS])
+  editableFields    Json?
+  presetAmounts     Json?
+  updatedAt         DateTime        @updatedAt
+}
+
+model Slide {
+  id          String   @id @default(cuid())
+  title       String?
+  description String?
+  imageUrl    String
+  link        String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 enum Role {
@@ -30,46 +138,11 @@ enum Role {
   COORDINATOR
 }
 
-// --- Geographic Hierarchy ---
-
-model Section {
-  id        String     @id @default(cuid())
-  name      String
-  type      SectionType
-  category  String     @default("KERALA") // "KERALA" or "OTHERS"
-  districts District[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  donations Donation[]
-}
-
 enum SectionType {
   State
   Section
   Country
   Other
-}
-
-model District {
-  id        String   @id @default(cuid())
-  name      String
-  sectionId String   
-  section   Section  @relation(fields: [sectionId], references: [id])
-  places    Place[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  donations Donation[]
-}
-
-model Place {
-  id         String    @id @default(cuid())
-  name       String
-  type       PlaceType
-  districtId String    
-  district   District  @relation(fields: [districtId], references: [id])
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
-  donations  Donation[]
 }
 
 enum PlaceType {
@@ -79,79 +152,15 @@ enum PlaceType {
   Other
 }
 
-// --- Organizational Units ---
-
-model Unit {
-  id        String     @id @default(cuid())
-  name      String
-  placeIds  String[]   
-  status    UnitStatus @default(Active)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  donations Donation[]
-}
-
 enum UnitStatus {
   Active
   Inactive
-}
-
-// --- Batches ---
-
-model Batch {
-  id          String      @id @default(cuid())
-  name        String      @unique
-  slug        String?     @unique
-  year        String
-  description String?
-  status      BatchStatus @default(Active)
-  totalAmount Float       @default(0)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  donations   Donation[]
-  coordinators User[]
 }
 
 enum BatchStatus {
   Active
   Completed
   Archived
-}
-
-// --- Donations ---
-
-model Donation {
-  id             String        @id @default(cuid())
-  amount         Float
-  name           String?
-  mobile         String?
-  hideName       Boolean       @default(false)
-  
-  batchId        String?       
-  batch          Batch?        @relation(fields: [batchId], references: [id])
-  
-  unitId         String?       
-  unit           Unit?         @relation(fields: [unitId], references: [id])
-  
-  placeId        String?       
-  place          Place?        @relation(fields: [placeId], references: [id])
-
-  districtId     String?
-  district       District?     @relation(fields: [districtId], references: [id])
-
-  sectionId      String?
-  section        Section?      @relation(fields: [sectionId], references: [id])
-  
-  paymentMethod  PaymentMethod
-  paymentStatus  PaymentStatus @default(PENDING)
-  transactionId  String?       @unique
-  category       DonationCategory @default(GENERAL)
-  
-  collectedById  String?
-  collectedBy    User?         @relation("CollectedBy", fields: [collectedById], references: [id])
-  
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
 }
 
 enum PaymentMethod {
@@ -171,36 +180,4 @@ enum DonationCategory {
   BATCH
   GENERAL
   PARENT
-}
-
-// --- Settings ---
-
-model Settings {
-  id                String   @id @default(cuid())
-  campaignTitle     String   @default("Jariya Fundraising")
-  totalAmountCached Float    @default(0)
-  razorpayKeyId     String?
-  razorpayKeySecret String?
-  upiId             String?
-  receiptImage      String?
-  receiptConfig     Json?    // Stores coordinates { x, y, fontSize, color } for each field
-  displayStatuses   PaymentStatus[] @default([SUCCESS])
-  editableFields    Json?    // Stores boolean flags for each field { amount: true, name: false, ... }
-  presetAmounts     Json?    // Stores preset donation amounts as array [500, 1000, 2000, 5000, 10000]
-  updatedAt         DateTime @updatedAt
-}
-
-
-// --- Slides/Banners ---
-
-model Slide {
-  id          String   @id @default(cuid())
-  title       String?
-  description String?
-  imageUrl    String
-  link        String?
-  order       Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 }

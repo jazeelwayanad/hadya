@@ -104,7 +104,7 @@ export default function CoordinatorDashboard() {
     if (loading) {
         return (
             <div className="min-h-screen bg-[#FFF9ED] flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-[#115E59]" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
@@ -211,7 +211,7 @@ export default function CoordinatorDashboard() {
                                         </div>
                                         <DialogFooter>
                                             <Button variant="outline" onClick={() => setEditSlugOpen(false)}>Cancel</Button>
-                                            <Button onClick={handleUpdateSlug} disabled={updatingSlug} className="bg-[#115E59] text-white">
+                                            <Button onClick={handleUpdateSlug} disabled={updatingSlug} className="bg-primary text-white">
                                                 {updatingSlug && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                                 Save Changes
                                             </Button>

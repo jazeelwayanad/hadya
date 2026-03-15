@@ -54,7 +54,7 @@ export default function AdminLayout({
                 </div>
                 <div className="absolute bottom-8 text-center space-y-1">
                     <p className="text-sm font-semibold text-[#115E59]">
-                        © Sabeelul Hidaya Islamic College
+                        © Jamia Raheemiyya
                     </p>
                     <p className="text-xs text-muted-foreground">
                         Developed by <a href="https://jazeelwayanad.me" target="_blank" className="hover:text-[#115e59] cursor-pointer">Jazeel Wayanad</a>
@@ -88,7 +88,7 @@ export default function AdminLayout({
                             className="object-contain brightness-0 invert"
                         />
                     </div>
-                    <span className="text-lg tracking-tight">Jariya Admin</span>
+                    <span className="text-lg tracking-tight">Hadya Admin</span>
                 </Link>
             </div>
             <div className="flex-1 overflow-auto py-6">
@@ -177,7 +177,7 @@ export default function AdminLayout({
                                 className="object-contain" // Keep original color on mobile header if desired, or invert. Let's keep original for white bg. 
                             />
                         </div>
-                        <span>Jariya</span>
+                        <span>hadya</span>
                     </div>
                 </header>
                 <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-gray-50/50">

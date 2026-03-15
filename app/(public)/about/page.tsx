@@ -16,7 +16,7 @@ export default function AboutPage() {
 
                 {/* Header Logos */}
                 <div className="flex justify-center items-center gap-8 mb-12">
-                    <img src="/left_side.png" alt="Jariya Logo" className="h-20 w-auto object-contain" />
+                    <img src="/left_side.png" alt="hadya Logo" className="h-20 w-auto object-contain" />
                     <img src="/right_sided.png" alt="College Logo" className="h-20 w-auto object-contain" />
                 </div>
 
@@ -25,11 +25,11 @@ export default function AboutPage() {
 
                     <div className="space-y-6 text-gray-600 leading-relaxed">
                         <p className="text-lg font-medium text-center mb-8">
-                            Jariya fundraising campaign by Sabeelul Hidaya Islamic College
+                            hadya Ramadan campaign by Jamia Raheemiyya
                         </p>
 
                         <p>
-                            Sabeelul Hidaya Islamic College is dedicated to providing quality education and fostering a community of learning and growth. Our "Jariya" campaign aims to support ongoing educational initiatives and infrastructure development.
+                            Jamia Raheemiyya is dedicated to providing quality education and fostering a community of learning and growth. Our "hadya" campaign aims to support ongoing educational initiatives and infrastructure development.
                         </p>
 
                         <p>
@@ -38,7 +38,7 @@ export default function AboutPage() {
 
                         <div className="bg-[#FFF9ED] rounded-xl p-6 mt-8">
                             <h3 className="font-bold text-[#115e59] mb-2">Contact Us</h3>
-                            <p className="mb-1">Sabeelul Hidaya Islamic College</p>
+                            <p className="mb-1">Jamia Raheemiyya</p>
                             <p className="mb-1">Parappur, Kottakkal</p>
                             <p className="mb-1">Malappuram, Kerala - 676503</p>
                             <p>Email: admin@sabeelulhidaya.org</p>

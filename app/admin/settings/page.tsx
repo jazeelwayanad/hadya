@@ -43,8 +43,6 @@ export default function AdminSettingsPage() {
         campaignStatus: "ACTIVE",
         bannerImage: "",
         upiId: "",
-        razorpayKeyId: "",
-        razorpayKeySecret: "",
         receiptImage: "",
         receiptConfig: {
             name: { x: 50, y: 50, fontSize: 20, color: "#000000", align: "center", fontWeight: "600", letterSpacing: 0 },
@@ -80,8 +78,6 @@ export default function AdminSettingsPage() {
                         campaignStatus: data.campaignStatus || "ACTIVE",
                         bannerImage: data.bannerImage || "",
                         upiId: data.upiId || "",
-                        razorpayKeyId: data.razorpayKeyId || "",
-                        razorpayKeySecret: data.razorpayKeySecret || "",
                         receiptImage: data.receiptImage || "",
                         receiptConfig: data.receiptConfig || {
                             name: { x: 50, y: 50, fontSize: 20, color: "#000000", align: "center", fontWeight: "600", letterSpacing: 0 },
@@ -195,7 +191,7 @@ export default function AdminSettingsPage() {
                                 id="campaignTitle"
                                 value={settings.campaignTitle}
                                 onChange={handleChange}
-                                placeholder="Jariya Fundraising"
+                                placeholder="hadya Ramadan"
                             />
                         </div>
 
@@ -272,7 +268,28 @@ export default function AdminSettingsPage() {
                     </CardContent>
                 </Card>
 
-                {/* Payment Configuration removed as per user request */}
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Payment Configuration</CardTitle>
+                        <CardDescription>
+                            Set the UPI ID used for receiving donations via UPI / QR code.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="grid gap-2">
+                            <Label htmlFor="upiId">UPI ID</Label>
+                            <Input
+                                id="upiId"
+                                value={settings.upiId}
+                                onChange={handleChange}
+                                placeholder="yourname@upi"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                This UPI ID will be used to generate the payment QR code and deep link shown to donors.
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 <Card>
                     <CardHeader>

@@ -71,12 +71,12 @@ export default function TransactionsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white text-foreground pb-10 font-sans">
+        <div className="min-h-screen bg-[#FFF9ED] text-foreground pb-10 font-sans">
             {/* Header */}
-            <div className="bg-[#134E4A] text-white pt-6 pb-12 px-4 sm:pt-8 sm:pb-16 sm:px-6 relative mb-6 sm:mb-8 shadow-xl">
+            <div className="bg-[#162B40] text-white pt-6 pb-12 px-4 sm:pt-8 sm:pb-16 sm:px-6 relative mb-6 sm:mb-8 shadow-xl">
                 <div className="flex items-center mb-6 sm:mb-8">
                     <Link href="/">
-                        <Button variant="secondary" size="sm" className="rounded-full bg-white text-[#134E4A] hover:bg-white/90 font-bold px-6 h-9">
+                        <Button variant="secondary" size="sm" className="rounded-full bg-white text-[#162B40] hover:bg-white/90 font-bold px-6 h-9">
                             <ArrowLeft className="w-4 h-4 mr-2" /> Back
                         </Button>
                     </Link>
@@ -93,7 +93,7 @@ export default function TransactionsPage() {
                         onChange={(e) => setSearch(e.target.value)}
                         className="h-12 border border-gray-300 rounded-l-xl rounded-r-none bg-white px-3 sm:px-4 text-xs sm:text-sm placeholder:text-gray-400 shadow-sm flex-1"
                     />
-                    <button className="h-12 w-12 bg-[#115e59] rounded-r-xl flex items-center justify-center shadow-sm shrink-0">
+                    <button className="h-12 w-12 bg-[#162B40] rounded-r-xl flex items-center justify-center shadow-sm shrink-0">
                         <Search className="w-5 h-5 text-white" />
                     </button>
                 </div>
@@ -112,12 +112,12 @@ export default function TransactionsPage() {
                                 {/* Left side - Details */}
                                 <div className="space-y-2 text-sm flex-1 w-full">
                                     <div className="flex">
-                                        <span className="text-[#134E4A] font-bold w-24 shrink-0 text-xs sm:text-sm">Name</span>
+                                        <span className="text-[#162B40] font-bold w-24 shrink-0 text-xs sm:text-sm">Name</span>
                                         <span className="text-gray-400 mr-2">:</span>
                                         <span className="text-black font-medium text-xs sm:text-sm">{tx.name}</span>
                                     </div>
                                     <div className="flex">
-                                        <span className="text-[#134E4A] font-bold w-24 shrink-0 text-xs sm:text-sm">Details</span>
+                                        <span className="text-[#162B40] font-bold w-24 shrink-0 text-xs sm:text-sm">Details</span>
                                         <span className="text-gray-400 mr-2">:</span>
                                         <div className="text-black font-medium text-xs sm:text-sm">
                                             {tx.details.map((detail, i) => (
@@ -126,13 +126,13 @@ export default function TransactionsPage() {
                                         </div>
                                     </div>
                                     <div className="flex">
-                                        <span className="text-[#134E4A] font-bold w-24 shrink-0 text-xs sm:text-sm">Date & Time</span>
+                                        <span className="text-[#162B40] font-bold w-24 shrink-0 text-xs sm:text-sm">Date & Time</span>
                                         <span className="text-gray-400 mr-2">:</span>
                                         <span className="text-black font-medium text-xs sm:text-sm">{formatDate(tx.date)}</span>
                                     </div>
                                     {tx.transactionId && (
                                         <div className="flex">
-                                            <span className="text-[#134E4A] font-bold w-24 shrink-0 text-xs sm:text-sm">Tx ID</span>
+                                            <span className="text-[#162B40] font-bold w-24 shrink-0 text-xs sm:text-sm">Tx ID</span>
                                             <span className="text-gray-400 mr-2">:</span>
                                             <span className="text-black font-medium text-[10px] sm:text-xs self-center break-all">{tx.transactionId}</span>
                                         </div>
@@ -143,7 +143,7 @@ export default function TransactionsPage() {
                                 <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start w-full sm:w-auto gap-2 sm:ml-4 border-t sm:border-t-0 pt-3 sm:pt-0 mt-2 sm:mt-0 border-dashed border-gray-200">
                                     <span className="text-xl sm:text-2xl font-bold text-black">{formatCurrency(tx.amount)}</span>
                                     <Link href={`/receipt/${tx.transactionId || tx.id}`}>
-                                        <Button size="sm" className="rounded-full bg-[#115e59] hover:bg-[#0f504c] text-white text-xs px-5 h-7 font-medium shadow-sm">
+                                        <Button size="sm" className="rounded-full bg-[#162B40] hover:brightness-90 text-white text-xs px-5 h-7 font-medium shadow-sm">
                                             Receipt
                                         </Button>
                                     </Link>

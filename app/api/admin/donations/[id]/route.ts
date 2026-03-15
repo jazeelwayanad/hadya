@@ -80,12 +80,6 @@ export async function PUT(
             });
 
             // 2. Handle Batch Total Updates
-            // Scenario A: Status Changed
-            // Scenario B: Amount Changed (and status is SUCCESS)
-            // Scenario C: Batch Changed (and status is SUCCESS)
-
-            // Simplification: Revert old contribution, Add new contribution
-
             // Revert Old (if it was SUCCESS)
             if (oldStatus === 'SUCCESS' && oldBatchId) {
                 await tx.batch.update({

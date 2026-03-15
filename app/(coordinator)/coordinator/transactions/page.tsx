@@ -29,6 +29,7 @@ export default function CoordinatorTransactionsPage() {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
+    const [statusFilter, setStatusFilter] = useState("ALL");
 
     useEffect(() => {
         const fetchTransactions = async () => {
@@ -57,7 +58,9 @@ export default function CoordinatorTransactionsPage() {
             (t.mobile || "").includes(searchQuery) ||
             t.amount.toString().includes(searchQuery);
 
-        return matchesSearch;
+        const matchesStatus = statusFilter === "ALL" || t.paymentStatus === statusFilter;
+
+        return matchesSearch && matchesStatus;
     });
 
     const formatCurrency = (amount: number) => {
@@ -71,7 +74,7 @@ export default function CoordinatorTransactionsPage() {
     if (loading) {
         return (
             <div className="flex justify-center items-center py-20 min-h-[50vh]">
-                <Loader2 className="w-8 h-8 animate-spin text-[#115E59]" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
@@ -82,7 +85,7 @@ export default function CoordinatorTransactionsPage() {
             <div className="flex flex-col gap-3 sticky top-16 bg-[#FFF9ED] z-10 py-2">
                 <div className="flex justify-between items-end">
                     <div>
-                        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[#115E59]">Transactions</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-primary">Transactions</h1>
                         <p className="text-xs sm:text-sm text-gray-500">History of batch donations.</p>
                     </div>
                 </div>
@@ -92,11 +95,23 @@ export default function CoordinatorTransactionsPage() {
                         <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
                         <Input
                             placeholder="Search by Name, Amount..."
-                            className="pl-9 bg-white border-gray-200 h-9 text-sm rounded-xl focus-visible:ring-[#115E59]"
+                            className="pl-9 bg-white border-gray-200 h-9 text-sm rounded-xl focus-visible:ring-primary"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
                     </div>
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-[110px] sm:w-[130px] h-9 bg-white border-gray-200 rounded-xl text-sm">
+                            <Filter className="w-3.5 h-3.5 mr-2" />
+                            <SelectValue placeholder="Status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">All</SelectItem>
+                            <SelectItem value="SUCCESS">Success</SelectItem>
+                            <SelectItem value="PENDING">Pending</SelectItem>
+                            <SelectItem value="FAILED">Failed</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
 
@@ -109,7 +124,7 @@ export default function CoordinatorTransactionsPage() {
                             <Button
                                 variant="link"
                                 onClick={() => { setSearchQuery(""); }}
-                                className="text-[#115E59] text-xs mt-2"
+                                className="text-primary text-xs mt-2"
                             >
                                 Clear Search
                             </Button>
@@ -140,22 +155,34 @@ export default function CoordinatorTransactionsPage() {
                                     </div>
                                 </div>
 
-                                {/* Right: Amount */}
+                                {/* Right: Amount & Status */}
                                 <div className="text-right shrink-0">
                                     <div className="font-bold text-sm text-teal-700">
                                         +{formatCurrency(t.amount)}
+                                    </div>
+                                    <div className="mt-1">
+                                        <Badge variant={t.paymentStatus === "SUCCESS" ? "default" : t.paymentStatus === "PENDING" ? "secondary" : "destructive"} 
+                                               className={`text-[10px] px-1.5 py-0 leading-tight ${t.paymentStatus === "SUCCESS" ? "bg-primary hover:bg-primary" : t.paymentStatus === "PENDING" ? "bg-amber-100 text-amber-700 hover:bg-amber-100" : ""}`}>
+                                            {t.paymentStatus}
+                                        </Badge>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Bottom Actions Row */}
                             <div className="pt-2 border-t border-gray-50 flex justify-end">
-                                <Link href={`/receipt/${t.transactionId || t.id}`} className="inline-flex items-center">
-                                    <Button variant="ghost" size="sm" className="h-7 text-xs text-[#115E59] hover:bg-teal-50 px-2 rounded-lg">
-                                        <Download className="w-3.5 h-3.5 mr-1.5" />
-                                        Download Receipt
-                                    </Button>
-                                </Link>
+                                {t.paymentStatus === "SUCCESS" ? (
+                                    <Link href={`/receipt/${t.transactionId || t.id}`} className="inline-flex items-center">
+                                        <Button variant="ghost" size="sm" className="h-7 text-xs text-primary hover:bg-teal-50 px-2 rounded-lg">
+                                            <Download className="w-3.5 h-3.5 mr-1.5" />
+                                            Download Receipt
+                                        </Button>
+                                    </Link>
+                                ) : (
+                                    <div className="text-[10px] text-gray-400 font-medium py-1 px-2">
+                                        {t.paymentStatus === "PENDING" ? "Waiting for Admin Approval" : "Transaction Failed"}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))

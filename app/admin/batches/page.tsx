@@ -193,11 +193,11 @@ export default function AdminBatchesPage() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Batches</h1>
-                    <p className="text-muted-foreground">Manage fundraising batches/campaigns.</p>
+                    <p className="text-muted-foreground">Manage Ramadan batches/campaigns.</p>
                 </div>
                 <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) resetForm() }}>
                     <DialogTrigger asChild>
-                        <Button className="bg-[#115E59] hover:bg-[#0f504c] text-white">
+                        <Button className="bg-primary hover:brightness-90 text-white">
                             <Plus className="mr-2 h-4 w-4" /> Create Batch
                         </Button>
                     </DialogTrigger>
@@ -242,7 +242,7 @@ export default function AdminBatchesPage() {
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button onClick={handleSave} disabled={processing} className="bg-[#115E59] hover:bg-[#0f504c] text-white">{processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save Batch</Button>
+                            <Button onClick={handleSave} disabled={processing} className="bg-primary hover:brightness-90 text-white">{processing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} Save Batch</Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>

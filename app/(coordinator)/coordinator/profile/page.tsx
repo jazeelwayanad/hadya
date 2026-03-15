@@ -72,7 +72,7 @@ export default function CoordinatorProfilePage() {
     if (loading) {
         return (
             <div className="min-h-screen bg-[#FFF9ED] flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-[#115E59]" />
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
         );
     }
@@ -88,7 +88,7 @@ export default function CoordinatorProfilePage() {
                 </Link>
                 <div className="text-right">
                     <h1 className="text-xl font-bold text-black tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>My Profile</h1>
-                    <p className="text-xs text-[#115E59] font-bold">Edit Details</p>
+                    <p className="text-xs text-primary font-bold">Edit Details</p>
                 </div>
             </div>
 
@@ -101,7 +101,7 @@ export default function CoordinatorProfilePage() {
                                 id="name"
                                 value={formData.name}
                                 onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                className="h-12 border-[#115E59] rounded-xl bg-white px-4 text-gray-800 shadow-none focus-visible:ring-2 focus-visible:ring-[#115E59]"
+                                className="h-12 border-primary rounded-xl bg-white px-4 text-gray-800 shadow-none focus-visible:ring-2 focus-visible:ring-primary"
                                 required
                             />
                         </div>
@@ -112,7 +112,7 @@ export default function CoordinatorProfilePage() {
                                 id="username"
                                 value={formData.username}
                                 onChange={e => setFormData({ ...formData, username: e.target.value })}
-                                className="h-12 border-[#115E59] rounded-xl bg-white px-4 text-gray-800 shadow-none focus-visible:ring-2 focus-visible:ring-[#115E59]"
+                                className="h-12 border-primary rounded-xl bg-white px-4 text-gray-800 shadow-none focus-visible:ring-2 focus-visible:ring-primary"
                                 placeholder="Optional"
                             />
                         </div>
@@ -124,7 +124,7 @@ export default function CoordinatorProfilePage() {
                                 type="email"
                                 value={formData.email}
                                 onChange={e => setFormData({ ...formData, email: e.target.value })}
-                                className="h-12 border-[#115E59] rounded-xl bg-white px-4 text-gray-800 shadow-none focus-visible:ring-2 focus-visible:ring-[#115E59]"
+                                className="h-12 border-primary rounded-xl bg-white px-4 text-gray-800 shadow-none focus-visible:ring-2 focus-visible:ring-primary"
                                 required
                             />
                         </div>
@@ -137,14 +137,14 @@ export default function CoordinatorProfilePage() {
                                     id="password"
                                     value={formData.password}
                                     onChange={e => setFormData({ ...formData, password: e.target.value })}
-                                    className="h-12 border-[#115E59] rounded-xl bg-white px-4 text-gray-800 shadow-none focus-visible:ring-2 focus-visible:ring-[#115E59]"
+                                    className="h-12 border-primary rounded-xl bg-white px-4 text-gray-800 shadow-none focus-visible:ring-2 focus-visible:ring-primary"
                                     placeholder="Leave empty to keep current"
                                     minLength={6}
                                 />
                             </div>
                         </div>
 
-                        <Button type="submit" disabled={saving} className="w-full h-12 text-lg font-bold rounded-[1.25rem] bg-[#115E59] hover:bg-[#0d4a46] mt-4 shadow-lg text-white">
+                        <Button type="submit" disabled={saving} className="w-full h-12 text-lg font-bold rounded-[1.25rem] bg-primary hover:brightness-90 mt-4 shadow-lg text-white">
                             {saving ? <Loader2 className="animate-spin" /> : "Save Changes"}
                         </Button>
                     </form>

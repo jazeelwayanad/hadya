@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Jariya - Fundraising Campaign",
-  description: "Jariya fundraising campaign by Sabeelul Hidaya Islamic College",
+  title: "Hadya - Ramadan Campaign",
+  description: "Hadya Ramadan campaign by Jamia Raheemiyya",
   icons: {
     icon: "/favicon.ico",
   },

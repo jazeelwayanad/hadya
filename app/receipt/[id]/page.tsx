@@ -13,11 +13,14 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
 
     const settings = await prisma.settings.findFirst();
 
-    if (!donation || !settings?.receiptImage || !settings?.receiptConfig) {
+    console.log("Settings Receipt Image:", settings?.receiptImage);
+    console.log("Settings Receipt Config:", settings?.receiptConfig);
+
+    if (!donation) {
         return notFound();
     }
 
-    const config = settings.receiptConfig as any;
+    const config = settings?.receiptConfig as any || {};
 
     // Helper to format date
     const formattedDate = new Date(donation.createdAt).toLocaleDateString("en-IN", {
@@ -43,7 +46,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
 
     return (
         <ReceiptContent
-            receiptImage={settings.receiptImage}
+            receiptImage={settings?.receiptImage || ""}
             config={config}
             donation={{
                 name: (donation.hideName ? "Well Wisher" : donation.name) || "Anonymous",
@@ -53,6 +56,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
                 formattedDate,
                 formattedDateTime,
                 placeName: place ? `${place.name}, ${place.district.name}` : "N/A",
+                paymentStatus: donation.paymentStatus,
             }}
         />
     );

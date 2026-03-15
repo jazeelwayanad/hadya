@@ -400,7 +400,7 @@ export default function AdminDonationsPage() {
                     </Button>
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button className="bg-[#115E59] hover:bg-[#0f504c] text-white">
+                            <Button className="bg-primary hover:brightness-90 text-white">
                                 <Plus className="mr-2 h-4 w-4" />
                                 Add Donation
                             </Button>
@@ -537,7 +537,7 @@ export default function AdminDonationsPage() {
                             </div>
                             <DialogFooter>
                                 <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                                <Button onClick={handleCreateDonation} disabled={submitting} className="bg-[#115E59] hover:bg-[#0f504c] text-white">
+                                <Button onClick={handleCreateDonation} disabled={submitting} className="bg-primary hover:brightness-90 text-white">
                                     {submitting ? "Adding..." : "Add Donation"}
                                 </Button>
                             </DialogFooter>
@@ -717,7 +717,7 @@ export default function AdminDonationsPage() {
                         </div>
                         <DialogFooter>
                             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-                            <Button onClick={handleUpdateDonation} disabled={submitting} className="bg-[#115E59] hover:bg-[#0f504c] text-white">
+                            <Button onClick={handleUpdateDonation} disabled={submitting} className="bg-primary hover:brightness-90 text-white">
                                 {submitting ? "Updating..." : "Update Donation"}
                             </Button>
                         </DialogFooter>

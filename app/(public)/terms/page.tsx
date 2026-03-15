@@ -30,7 +30,7 @@ export default function TermsPage() {
                         <section>
                             <h2 className="text-xl font-bold text-gray-800 mb-3">2. Donations</h2>
                             <p>
-                                All donations made through this platform are voluntary. We ensure that all funds are utilized for the stated purposes of Sabeelul Hidaya Islamic College.
+                                All donations made through this platform are voluntary. We ensure that all funds are utilized for the stated purposes of Jamia Raheemiyya.
                             </p>
                         </section>
 
@@ -44,7 +44,7 @@ export default function TermsPage() {
                         <section>
                             <h2 className="text-xl font-bold text-gray-800 mb-3">4. Disclaimer</h2>
                             <p>
-                                The materials on this website are provided on an 'as is' basis. Sabeelul Hidaya Islamic College makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
+                                The materials on this website are provided on an 'as is' basis. Jamia Raheemiyya makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.
                             </p>
                         </section>
                     </div>

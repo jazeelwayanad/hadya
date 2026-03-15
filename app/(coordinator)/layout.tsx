@@ -23,7 +23,7 @@ export default function CoordinatorLayout({
     return (
         <div className="min-h-screen bg-[#FFF9ED] font-sans flex flex-col max-w-[520px] mx-auto shadow-2xl border-x relative">
             {/* Header */}
-            <header className="sticky top-0 z-50 bg-[#115E59] text-white shadow-md">
+            <header className="sticky top-0 z-50 bg-primary text-white shadow-md">
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                     <Link href="/coordinator/dashboard" className="flex items-center gap-3">
                         <div className="relative w-8 h-8">
@@ -34,7 +34,7 @@ export default function CoordinatorLayout({
                                 className="object-contain brightness-0 invert"
                             />
                         </div>
-                        <span className="font-bold text-lg tracking-tight inline-block">Jariya Coordinator</span>
+                        <span className="font-bold text-lg tracking-tight inline-block">hadya Coordinator</span>
                     </Link>
 
                     <nav className="flex items-center gap-1">

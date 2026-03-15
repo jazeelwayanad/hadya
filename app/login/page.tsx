@@ -50,7 +50,7 @@ export default function LoginPage() {
     return (
         <div className="min-h-screen w-full lg:grid lg:grid-cols-2">
             {/* Left Side - Branding (Hidden on mobile) */}
-            <div className="hidden lg:flex flex-col justify-center items-center bg-[#115E59] p-10 text-white relative overflow-hidden">
+            <div className="hidden lg:flex flex-col justify-center items-center bg-primary p-10 text-white relative overflow-hidden">
                 {/* Decorative Background Elements */}
                 <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-[#1A6D66] opacity-50 blur-3xl"></div>
                 <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-[#0D4B47] opacity-50 blur-3xl"></div>
@@ -60,7 +60,7 @@ export default function LoginPage() {
                     <div className="relative w-55 h-55 mb-[-30px]">
                         <Image
                             src="/left_side.png"
-                            alt="Jariya Logo"
+                            alt="hadya Logo"
                             fill
                             className="object-contain brightness-0 invert"
                             priority
@@ -68,15 +68,15 @@ export default function LoginPage() {
                     </div>
 
                     <div className="space-y-4">
-                        <h1 className="text-5xl font-bold tracking-tight">Jariya Fundraising</h1>
+                        <h1 className="text-5xl font-bold tracking-tight">hadya Ramadan</h1>
                         <p className="text-xl text-teal-100 font-medium tracking-wide">
-                            Sabeelul Hidaya Islamic College
+                            Jamia Raheemiyya
                         </p>
                     </div>
 
                     <div className="pt-8">
                         <blockquote className="text-lg italic text-teal-50/90 max-w-sm mx-auto">
-                            &ldquo;Empowering our community through transparent and efficient fundraising management.&rdquo;
+                            &ldquo;Empowering our community through transparent and efficient Ramadan management.&rdquo;
                         </blockquote>
                     </div>
                 </div>
@@ -90,7 +90,7 @@ export default function LoginPage() {
                         <div className="relative w-30 h-30 mb-[-5px]">
                             <Image
                                 src="/left_side.png"
-                                alt="Jariya Logo"
+                                alt="hadya Logo"
                                 fill
                                 className="object-contain"
                                 priority
@@ -126,10 +126,10 @@ export default function LoginPage() {
                                     type="text"
                                     autoComplete="username"
                                     required
-                                    placeholder="admin@jariya.com or username"
+                                    placeholder="admin@hadya.com or username"
                                     value={identifier}
                                     onChange={(e) => setIdentifier(e.target.value)}
-                                    className="h-11 border-gray-200 focus-visible:ring-[#115E59] focus-visible:ring-offset-0"
+                                    className="h-11 border-gray-200 focus-visible:ring-primary focus-visible:ring-offset-0"
                                 />
                             </div>
 
@@ -144,7 +144,7 @@ export default function LoginPage() {
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="h-11 border-gray-200 focus-visible:ring-[#115E59] focus-visible:ring-offset-0"
+                                    className="h-11 border-gray-200 focus-visible:ring-primary focus-visible:ring-offset-0"
                                 />
                             </div>
                         </div>
@@ -152,7 +152,7 @@ export default function LoginPage() {
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="w-full h-11 bg-[#115E59] hover:bg-[#0f504c] text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+                            className="w-full h-11 bg-primary hover:brightness-90 text-white font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
                         >
                             {loading ? (
                                 <>
@@ -168,7 +168,7 @@ export default function LoginPage() {
                     </form>
 
                     <p className="text-center text-xs text-gray-400 mt-6">
-                        © {new Date().getFullYear()} Jariya Campaign via Sabeelul Hidaya Islamic College
+                        © {new Date().getFullYear()} hadya Campaign via Jamia Raheemiyya
                     </p>
                 </div>
             </div>

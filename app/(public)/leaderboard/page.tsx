@@ -50,12 +50,12 @@ export default function LeaderboardPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white text-foreground pb-20 font-sans">
+        <div className="min-h-screen bg-[#FFF9ED] text-foreground pb-20 font-sans">
             {/* Header */}
-            <div className="bg-[#115e59] text-white pt-8 pb-16 px-6 relative mb-5 shadow-xl">
+            <div className="bg-[#162B40] text-white pt-8 pb-16 px-6 relative mb-5 shadow-xl">
                 <div className="flex items-center mb-8">
                     <Link href="/">
-                        <Button variant="secondary" size="sm" className="rounded-full bg-white text-[#134E4A] hover:bg-white/90 font-bold px-6 h-9">
+                        <Button variant="secondary" size="sm" className="rounded-full bg-white text-[#162B40] hover:bg-white/90 font-bold px-6 h-9">
                             <ArrowLeft className="w-4 h-4 mr-2" /> Back
                         </Button>
                     </Link>
@@ -92,7 +92,7 @@ export default function LeaderboardPage() {
                                     <div key={index} className="bg-[#FFE8A3]/40 rounded-[1.2rem] p-3 pl-4 flex items-center justify-between shadow-sm border-none">
                                         <div className="flex items-center gap-3">
                                             <div className="relative">
-                                                <div className="w-12 h-12 rounded-full bg-[#115e59] flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                                                <div className="w-12 h-12 rounded-full bg-[#162B40] flex items-center justify-center text-white font-bold text-lg shadow-sm">
                                                     {rank}
                                                 </div>
                                                 {starColor && (

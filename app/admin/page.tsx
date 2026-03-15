@@ -45,7 +45,7 @@ export default function AdminDashboardPage() {
     if (loading) {
         return (
             <div className="flex h-[calc(100vh-200px)] items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-[#115E59]" />
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
         )
     }
@@ -65,7 +65,7 @@ export default function AdminDashboardPage() {
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="text-2xl font-bold text-[#115E59]">{value}</div>
+                <div className="text-2xl font-bold text-primary">{value}</div>
                 <p className="text-xs text-muted-foreground mt-1">
                     {subtext}
                 </p>
@@ -157,7 +157,7 @@ export default function AdminDashboardPage() {
                                             {txn.name || "Anonymous"}
                                             {txn.hideName && <span className="ml-2 text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-normal">Hidden</span>}
                                         </TableCell>
-                                        <TableCell className="font-bold text-[#115E59]">₹{txn.amount.toLocaleString()}</TableCell>
+                                        <TableCell className="font-bold text-primary">₹{txn.amount.toLocaleString()}</TableCell>
                                         <TableCell>
                                             {txn.batch ? <Badge variant="secondary" className="font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border-none">{txn.batch.name}</Badge> : "-"}
                                         </TableCell>
